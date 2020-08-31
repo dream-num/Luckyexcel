@@ -41,7 +41,7 @@ export class LuckyFile extends LuckyFileBase {
             let attrList = numfmts[i].attributeList;
             let numfmtid = getXmlAttibute(attrList, "numFmtId", "49");
             let formatcode = getXmlAttibute(attrList, "formatCode", "@");
-            console.log(numfmtid, formatcode);
+            // console.log(numfmtid, formatcode);
             if(!(numfmtid in numFmtDefault)){
                 numFmtDefaultC[numfmtid] = formatcode;
             }

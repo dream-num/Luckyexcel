@@ -36,6 +36,7 @@ export class LuckySheet extends LuckySheetBase {
         this.config = new LuckyConfig();
         this.celldata = [];
         this.mergeCells = this.readXml.getElementsByTagName("mergeCells/mergeCell", sheetFile);
+        let clrScheme = this.styles["clrScheme"] as Element[];
         let sheetView = this.readXml.getElementsByTagName("sheetViews/sheetView", sheetFile);
         let showGridLines = "1", tabSelected="0", zoomScale = "100", activeCell = "A1";
         if(sheetView.length>0){
@@ -55,6 +56,15 @@ export class LuckySheet extends LuckySheetBase {
         this.showGridLines = showGridLines;
         this.status = tabSelected;
         this.zoomRatio = parseInt(zoomScale)/100;
+
+        let tabColors = this.readXml.getElementsByTagName("sheetPr/tabColor", sheetFile);
+        if(tabColors!=null && tabColors.length>0){
+            let tabColor = tabColors[0], attrList = tabColor.attributeList;
+            if(attrList.rgb!=null){
+                let tc = getColor(tabColor, clrScheme, "b");
+                this.color = tc;
+            }
+        }
 
         let sheetFormatPr = this.readXml.getElementsByTagName("sheetFormatPr", sheetFile);
         let defaultColWidth = "8.38", defaultRowHeight="defaultRowHeight";

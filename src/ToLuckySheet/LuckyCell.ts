@@ -58,27 +58,6 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
         let sharedStrings = this.sharedStrings;
         let cellValue = new LuckySheetCelldataValue();
 
-        if(v!=null){
-            let value =v[0].value;
-            if(t==ST_CellType["SharedString"]){
-                let siIndex = parseInt(v[0].value);
-                let sharedSI = sharedStrings[siIndex];
-                // console.log(siIndex, sharedSI, sharedStrings);
-                let tFlag = sharedSI.getInnerElements("t");
-                if(tFlag!=null){
-                    let text = tFlag[0].value;
-                    cellValue.v = text;
-    
-                }
-            }
-            else if(t==ST_CellType["InlineString"] && v!=null){
-    
-            }
-            else {
-                cellValue.v = value;
-            }
-        }
-
         if(f!=null){
             let formula = f[0], attrList = formula.attributeList;
             let t = attrList.t, ref = attrList.ref, si = attrList.si;
@@ -96,13 +75,15 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
         }
 
+
+        let quotePrefix;
         if(s!=null){
             let sNum = parseInt(s);
             let cellXf = cellXfs[sNum];
             let xfId = cellXf.attributeList.xfId;
 
             let numFmtId,fontId,fillId,borderId;
-            let horizontal,vertical, wrapText, textRotation, shrinkToFit, indent;
+            let horizontal,vertical, wrapText, textRotation, shrinkToFit, indent,applyProtection;
 
             if(xfId!=null){
                 let cellStyleXf = cellStyleXfs[parseInt(xfId)];
@@ -114,6 +95,9 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 let applyBorder = attrList.applyBorder;
                 let applyAlignment = attrList.applyAlignment;
                 // let applyProtection = attrList.applyProtection;
+
+                applyProtection = attrList.applyProtection;
+                quotePrefix = attrList.quotePrefix;
 
                 if(applyNumberFormat!="0" && attrList.numFmtId!=null){
                     // if(attrList.numFmtId!="0"){
@@ -160,9 +144,14 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
             let applyFill = cellXf.attributeList.applyFill;
             let applyBorder = cellXf.attributeList.applyBorder;
             let applyAlignment = cellXf.attributeList.applyAlignment;
-
-            let applyProtection = cellXf.attributeList.applyProtection;
-            let quoteprefix = cellXf.attributeList.quoteprefix;
+            
+            if(cellXf.attributeList.applyProtection!=null){
+                applyProtection = cellXf.attributeList.applyProtection;
+            }
+            
+            if(cellXf.attributeList.quotePrefix!=null){
+                quotePrefix = cellXf.attributeList.quotePrefix;
+            }
 
             if(applyNumberFormat!="0" && cellXf.attributeList.numFmtId!=null){
                 numFmtId = cellXf.attributeList.numFmtId;
@@ -479,6 +468,37 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 }
             }
             
+        }
+        else{
+            cellValue.tb = 1;
+        }
+
+        if(v!=null){
+            let value =v[0].value;
+            if(t==ST_CellType["SharedString"]){
+                let siIndex = parseInt(v[0].value);
+                let sharedSI = sharedStrings[siIndex];
+                // console.log(siIndex, sharedSI, sharedStrings);
+                let tFlag = sharedSI.getInnerElements("t");
+                if(tFlag!=null){
+                    let text = "";
+                    tFlag.forEach((t)=>{
+                        text += t.value;
+                    });
+                    cellValue.v = text;
+                    quotePrefix = "1";
+                }
+            }
+            else if(t==ST_CellType["InlineString"] && v!=null){
+    
+            }
+            else {
+                cellValue.v = value;
+            }
+        }
+
+        if(quotePrefix!=null){
+            cellValue.qp = parseInt(quotePrefix);
         }
 
         return cellValue;

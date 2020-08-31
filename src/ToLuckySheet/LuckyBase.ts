@@ -70,6 +70,7 @@ export class LuckySheetCelldataValue implements IluckySheetCelldataValue{
     v: string | undefined //Original value, v
     m: string | undefined //Display value, v
     f: string | undefined //formula, f
+    qp:number | undefined //quotePrefix, show number as string
 }
 
 
