@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Hello World!</title>
+        <link rel='stylesheet' href='./luckysheet/plugins/css/pluginsCss.css' />
+        <link rel='stylesheet' href='./luckysheet/plugins/plugins.css' />
+        <link rel='stylesheet' href='./luckysheet/css/luckysheet.css' />
+        <script src="./luckysheet/plugins/js/plugin.js"></script>
+        <script src="./luckysheet/luckysheet.umd.js"></script>
+        <script>
+            $(function () {
+                //Configuration item
+                var options = {
+                    container: 'luckysheet' //luckysheet is the container id
+                }
+                luckysheet.create(options)
+            });
+        </script>
+    </head>
+    <body>
+        <p id="greeting">Loading ...</p>
+        <input type="file" id="Luckyexcel-demo-file" name="Luckyexcel-demo-file" change="demoHandler" />
+        <div id="luckysheet" style="margin:0px;padding:0px;position:absolute;width:100%;left: 0px;top: 100px;bottom: 0px;"></div>
+        <script src="bundle.js"></script>
+        <!-- <script type="module" src="index.js"></script> -->
+        <!-- <script type="module">
+            // import {importFile} from './main';
+            window.onload = () => {
+                let upload = document.getElementById("file");
+                upload.addEventListener("change", function(evt){
+                    var files = evt.target.files;   
+                    importFile(files[0]);
+                });
+            }
+        </script> -->
+    </body>
+</html>
