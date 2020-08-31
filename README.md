@@ -4,7 +4,7 @@ English| [简体中文](./README-zh.md)
 Luckyexcel is an excel import and export library adapted to [Luckysheet](https://github.com/mengshukeji/Luckysheet). It only supports .xlsx format files (not .xls).
 
 ## Demo
-[Demo](https://mengshukeji.github.io/LuckysheetDemo/)
+[Demo](https://mengshukeji.github.io/LuckyexcelDemo/)
 
 ## Features
 Support excel file import to Luckysheet adaptation list

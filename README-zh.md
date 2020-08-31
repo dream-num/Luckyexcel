@@ -4,7 +4,7 @@
 Luckyexcel，是一个适配 [Luckysheet](https://github.com/mengshukeji/Luckysheet) 的excel导入导出库，只支持.xlsx格式文件（不支持.xls）。
 
 ## 演示
-[Demo](https://mengshukeji.github.io/LuckysheetDemo/)
+[Demo](https://mengshukeji.github.io/LuckyexcelDemo/)
 
 ## 特性
 支持excel文件导入到Luckysheet适配列表
