@@ -164,6 +164,7 @@ export interface IluckySheetCelldataValue{
     v: string | undefined, //Original value	
     m: string | undefined, //Display value	
     f: string | undefined, //formula
+    qp:number | undefined //quotePrefix, show number as string
 }
 
 
