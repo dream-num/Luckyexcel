@@ -4,7 +4,7 @@ English| [简体中文](./README-zh.md)
 Luckyexcel is an excel import and export library adapted to [Luckysheet](https://github.com/mengshukeji/Luckysheet). It only supports .xlsx format files (not .xls).
 
 ## Demo
-[Demo](https://mengshukeji.github.io/LuckysheetDemo/)
+[Demo](https://mengshukeji.github.io/LuckyexcelDemo/)
 
 ## Features
 Support excel file import to Luckysheet adaptation list
@@ -34,6 +34,8 @@ npm install -g gulp-cli
 npm install
 gulp
 ```
+
+A third-party plug-in is used in the project: [JSZip](https://github.com/Stuk/jszip), thanks!
 
 ## Usage (under improvement)
 
