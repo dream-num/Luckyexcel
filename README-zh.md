@@ -33,8 +33,19 @@ Luckyexcel，是一个适配 [Luckysheet](https://github.com/mengshukeji/Luckysh
 ```
 npm install -g gulp-cli
 npm install
-gulp
 ```
+
+## 开发
+开发
+```
+npm run dev
+```
+打包
+```
+npm run build
+```
+
+项目中使用了第三方插件：[JSZip](https://github.com/Stuk/jszip)，感谢！
 
 ## 用法（改进中）
 

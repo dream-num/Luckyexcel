@@ -53,7 +53,7 @@ function bundle() {
             extensions: ['.ts']
         })
         .bundle()
-        .pipe(source('bundle.js'))
+        .pipe(source('luckyexcel.js'))
         .pipe(buffer())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(uglify())
@@ -76,12 +76,17 @@ function serve() {
 }
 
 // 顺序执行
-exports.default = series(clean, copyHtml, bundle, serve);
+const dev = series(clean, copyHtml, bundle, serve);
 
-exports.build = series(clean, copyHtml, bundle);
+const build = series(clean, copyHtml, bundle);
 
 // 每次TypeScript文件改变时Browserify会执行bundle函数
 watchedBrowserify.on("update", series(bundle, reload));
 
 // 将日志打印到控制台
 watchedBrowserify.on("log", log);
+
+
+exports.dev = dev;
+exports.build = build;
+exports.default = dev;

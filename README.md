@@ -32,8 +32,19 @@ The goal is to support all features supported by Luckysheet
 ```
 npm install -g gulp-cli
 npm install
-gulp
 ```
+
+## Development
+Development
+```
+npm run dev
+```
+Package
+```
+npm run build
+```
+
+A third-party plug-in is used in the project: [JSZip](https://github.com/Stuk/jszip), thanks!
 
 ## Usage (under improvement)
 
