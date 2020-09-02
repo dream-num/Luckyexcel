@@ -1,7 +1,7 @@
 import { IluckySheetborderInfoCellForImp,IluckySheetCelldataValue,IluckySheetCelldataValueMerge,ILuckySheetCellFormat } from "./ILuck";
 import { ReadXml, Element, IStyleCollections,getColor } from "./ReadXml";
 import {getXmlAttibute, getColumnWidthPixel, getRowHeightPixel,getcellrange, escapeCharacter} from "../common/method";
-import { ST_CellType, indexedColors, OEM_CHARSET,borderTypes } from "../common/constant"
+import { ST_CellType, indexedColors, OEM_CHARSET,borderTypes,fontFamilys } from "../common/constant"
 import { IattributeList, stringToNum } from "../ICommon";
 import { LuckySheetborderInfoCellValueStyle,LuckySheetborderInfoCellForImp,LuckySheetborderInfoCellValue,LuckySheetCelldataBase,LuckySheetCelldataValue,LuckySheetCellFormat } from "./LuckyBase";
 
@@ -245,7 +245,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                     if(familyOverrides!=null && familyOverrides.length>0){
                         let val = familyOverrides[0].attributeList.val;
                         if(val!=null){
-                            ff = val;
+                            ff = fontFamilys[val];
                         }
                     }
                     if(family!=null && family.length>0){

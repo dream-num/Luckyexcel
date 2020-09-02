@@ -1,4 +1,4 @@
-import {stringToNum, IattributeList} from "../ICommon";
+import {stringToNum, IattributeList, numTostring} from "../ICommon";
 
 export const columeHeader_word:string[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
@@ -174,4 +174,14 @@ export const borderTypes:stringToNum = {
     "mediumDashDotDot":11, 
     "slantDashDot":12, 
     "thick":13
+}
+
+
+export const fontFamilys:IattributeList = {
+    "0":"defualt",
+    "1":"Roman",
+    "2":"Swiss",
+    "3":"Modern",
+    "4":"Script",
+    "5":"Decorative"
 }
