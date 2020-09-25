@@ -203,6 +203,13 @@ export class LuckySheet extends LuckySheetBase {
 
                     delete this.config.columnlen[m];
                 }
+
+                if(customWidth!=null){
+                    if(this.config.customWidth==null){
+                        this.config.customWidth = {};
+                    }
+                    this.config.customWidth[m] = 1;
+                }
             } 
         }
     }

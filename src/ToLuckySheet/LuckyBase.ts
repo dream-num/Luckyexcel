@@ -1,4 +1,4 @@
-import { ILuckyFile, ILuckyFileInfo,IluckySheet,IluckySheetCelldata,IluckySheetConfig,IluckySheetCelldataValue,IluckySheetCelldataValueMerge,ILuckySheetCellFormat,IluckySheetConfigMerges,IluckySheetConfigMerge,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IluckySheetborderInfoCellForImp,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IluckysheetFrozen,IluckySheetChart,IluckySheetPivotTable,IluckysheetConditionFormat,IluckysheetCalcChain} from "./ILuck";
+import { ILuckyFile, ILuckyFileInfo,IluckySheet,IluckySheetCelldata,IluckySheetConfig,IluckySheetCelldataValue,IluckySheetCelldataValueMerge,ILuckySheetCellFormat,IluckySheetConfigMerges,IluckySheetConfigMerge,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IluckySheetborderInfoCellForImp,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IluckysheetFrozen,IluckySheetChart,IluckySheetPivotTable,IluckysheetConditionFormat,IluckysheetCalcChain,ILuckyInlineString} from "./ILuck";
 
 
 
@@ -65,11 +65,12 @@ export class LuckySheetCelldataValue implements IluckySheetCelldataValue{
     vt: number | undefined//Vertical alignment, 0 middle, 1 up, 2 down, alignment
     ht: number | undefined//Horizontal alignment,0 center, 1 left, 2 right, alignment
     mc: IluckySheetCelldataValueMerge | undefined //Merge Cells, mergeCells
-    tr: number | undefined //Text rotation,0: 0、1: 45 、2: -45、3 Vertical text、4: 90 、5: -90, alignment
+    tr: number | undefined //Text rotation,0: 0、3 Vertical text alignment
     tb: number | undefined //Text wrap,0 truncation, 1 overflow, 2 word wrap, alignment
     v: string | undefined //Original value, v
     m: string | undefined //Display value, v
     f: string | undefined //formula, f
+    rt:number | undefined //text rotation angle 0-180 alignment
     qp:number | undefined //quotePrefix, show number as string
 }
 
@@ -77,6 +78,19 @@ export class LuckySheetCelldataValue implements IluckySheetCelldataValue{
 export class LuckySheetCellFormat implements ILuckySheetCellFormat {
     fa:string
     t:string
+    s:LuckyInlineString[] | undefined
+}
+
+export class LuckyInlineString implements ILuckyInlineString {
+    ff:string | undefined //font family
+    fc:string | undefined//font color
+    fs:number | undefined//font size
+    cl:number | undefined//strike
+    un:number | undefined//underline
+    bl:number | undefined//blod
+    it:number | undefined//italic
+    va:number | undefined//1sub and 2super and 0none
+    v:string | undefined
 }
 
 export class LuckyConfig implements IluckySheetConfig{

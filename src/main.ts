@@ -21,6 +21,7 @@ function demoHandler(){
                     
                     window.luckysheet.create({
                         container: 'luckysheet', //luckysheet is the container id
+                        showinfobar:false,
                         data:exportJson.sheets,
                         title:exportJson.info.name,
                         userInfo:exportJson.info.name.creator

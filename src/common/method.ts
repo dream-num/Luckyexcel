@@ -177,7 +177,6 @@ export function getXmlAttibute(dom:IattributeList, attr:string, d:string){
     return value;
 }
 
-
 /** 
  * @columnWidth Excel column width
  * @return pixel column width

@@ -163,6 +163,7 @@ export interface IluckySheetCelldataValue{
     tb: number | undefined, //Text wrap,0 truncation, 1 overflow, 2 word wrap
     v: string | undefined, //Original value	
     m: string | undefined, //Display value	
+    rt:number | undefined, //text rotation angle 0-180 alignment
     f: string | undefined, //formula
     qp:number | undefined //quotePrefix, show number as string
 }
@@ -269,4 +270,16 @@ export interface IFormulaCellValue{
     si:string
     fv:string
     cellValue:IluckySheetCelldata
+}
+
+export interface ILuckyInlineString {
+    ff:string | undefined //font family
+    fc:string | undefined//font color
+    fs:number | undefined//font size
+    cl:number | undefined//strike
+    un:number | undefined//underline
+    bl:number | undefined//blod
+    it:number | undefined//italic
+    va:number | undefined//1sub and 2super and 0none
+    v:string | undefined
 }

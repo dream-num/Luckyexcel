@@ -1,9 +1,9 @@
 import { IluckySheetborderInfoCellForImp,IluckySheetCelldataValue,IluckySheetCelldataValueMerge,ILuckySheetCellFormat } from "./ILuck";
-import { ReadXml, Element, IStyleCollections,getColor } from "./ReadXml";
+import { ReadXml, Element, IStyleCollections,getColor,getlineStringAttr } from "./ReadXml";
 import {getXmlAttibute, getColumnWidthPixel, getRowHeightPixel,getcellrange, escapeCharacter} from "../common/method";
 import { ST_CellType, indexedColors, OEM_CHARSET,borderTypes,fontFamilys } from "../common/constant"
 import { IattributeList, stringToNum } from "../ICommon";
-import { LuckySheetborderInfoCellValueStyle,LuckySheetborderInfoCellForImp,LuckySheetborderInfoCellValue,LuckySheetCelldataBase,LuckySheetCelldataValue,LuckySheetCellFormat } from "./LuckyBase";
+import { LuckySheetborderInfoCellValueStyle,LuckySheetborderInfoCellForImp,LuckySheetborderInfoCellValue,LuckySheetCelldataBase,LuckySheetCelldataValue,LuckySheetCellFormat,LuckyInlineString } from "./LuckyBase";
 
 export class LuckySheetCelldata extends LuckySheetCelldataBase{
     _borderObject:IluckySheetborderInfoCellForImp
@@ -288,15 +288,24 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                         }
                     }
 
-                    if(underlines!=null && underlines.length>0){
-                        let underline = underlines[0].attributeList.val;
-                        if(underline=="0"){
-                            cellValue.un =  0;
-                        }
-                        else{
-                            cellValue.un =  1;
-                        }
-                    }
+                    if(underlines!=null && underlines.length>0){
+                        let underline = underlines[0].attributeList.val;
+                        if(underline=="single"){
+                            cellValue.un =  1;
+                        }
+                        else if(underline=="double"){
+                            cellValue.un =  2;
+                        }
+                        else if(underline=="singleAccounting"){
+                            cellValue.un =  3;
+                        }
+                        else if(underline=="doubleAccounting"){
+                            cellValue.un =  4;
+                        }
+                        else{
+                            cellValue.un =  0;
+                        }
+                    }
                 }
             }
 
@@ -370,24 +379,27 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
             if(textRotation!=undefined){
                 // tr: number | undefined //Text rotation,0: 0、1: 45 、2: -45、3 Vertical text、4: 90 、5: -90, alignment
-                if(textRotation=="0"){
-                    cellValue.tr = 0;
+                if(textRotation=="255"){
+                    cellValue.tr = 3;
                 }
-                else if(textRotation=="45"){
-                    cellValue.tr = 1;
-                }
-                else if(textRotation=="90"){
-                    cellValue.tr = 4;
-                }
-                else if(textRotation=="135"){
-                    cellValue.tr = 2;
-                }
-                else if(textRotation=="180"){
-                    cellValue.tr = 5;
-                }
+                // else if(textRotation=="45"){
+                //     cellValue.tr = 1;
+                // }
+                // else if(textRotation=="90"){
+                //     cellValue.tr = 4;
+                // }
+                // else if(textRotation=="135"){
+                //     cellValue.tr = 2;
+                // }
+                // else if(textRotation=="180"){
+                //     cellValue.tr = 5;
+                // }
                 else{
                     cellValue.tr = 0;
+                    cellValue.rt =  parseInt(textRotation);
                 }
+
+                
             }
 
             if(shrinkToFit!=undefined){//luckysheet unsupport
@@ -478,20 +490,151 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
             if(t==ST_CellType["SharedString"]){
                 let siIndex = parseInt(v[0].value);
                 let sharedSI = sharedStrings[siIndex];
-                // console.log(siIndex, sharedSI, sharedStrings);
-                let tFlag = sharedSI.getInnerElements("t");
-                if(tFlag!=null){
-                    let text = "";
-                    tFlag.forEach((t)=>{
-                        text += t.value;
+
+                let rFlag = sharedSI.getInnerElements("r");
+                if(rFlag==null){
+                    let tFlag = sharedSI.getInnerElements("t");
+                    if(tFlag!=null){
+                        let text = "";
+                        tFlag.forEach((t)=>{
+                            text += t.value;
+                        });
+
+                        if(text.indexOf("\r\n")>-1 || text.indexOf("\n")>-1){
+                            let InlineString = new LuckyInlineString();
+                            InlineString.v = text;
+                            let cellFormat = cellValue.ct;
+                            if(cellFormat==null){
+                                cellFormat = new LuckySheetCellFormat();
+                            }
+
+                            if(cellValue.ff!=null){
+                                InlineString.ff = cellValue.ff;
+                            }
+
+                            if(cellValue.fc!=null){
+                                InlineString.fc = cellValue.fc;
+                            }
+                            
+                            if(cellValue.fs!=null){
+                                InlineString.fs = cellValue.fs;
+                            }
+
+                            if(cellValue.cl!=null){
+                                InlineString.cl = cellValue.cl;
+                            }
+
+                            if(cellValue.un!=null){
+                                InlineString.un = cellValue.un;
+                            }
+
+                            if(cellValue.bl!=null){
+                                InlineString.bl = cellValue.bl;
+                            }
+
+                            if(cellValue.it!=null){
+                                InlineString.it = cellValue.it;
+                            }
+
+                            cellFormat.t = "inlineStr";
+                            cellFormat.s = [InlineString];
+                            cellValue.ct = cellFormat;
+                        }
+                        else{
+                            cellValue.v = text;
+                            quotePrefix = "1";
+                        }
+
+                    }
+                }
+                else{
+                    let styles:LuckyInlineString[] = [];
+                    rFlag.forEach((r)=>{
+                        let tFlag = r.getInnerElements("t");
+                        let rPr = r.getInnerElements("rPr");
+                        
+                        let InlineString = new LuckyInlineString();
+
+                        if(tFlag!=null && tFlag.length>0){
+                            InlineString.v = tFlag[0].value;
+                        }
+
+                        if(rPr!=null && rPr.length>0){
+                            let frpr = rPr[0];
+                            let sz = getlineStringAttr(frpr,"sz"), rFont=getlineStringAttr(frpr,"rFont"), family=getlineStringAttr(frpr,"family"), charset=getlineStringAttr(frpr,"charset"), scheme=getlineStringAttr(frpr,"scheme"), b=getlineStringAttr(frpr,"b"), i=getlineStringAttr(frpr,"i"), u=getlineStringAttr(frpr,"u"), strike=getlineStringAttr(frpr,"strike"), vertAlign=getlineStringAttr(frpr,"vertAlign"), color;
+
+
+                            let cEle = frpr.getInnerElements("color");
+                            if(cEle!=null && cEle.length>0){
+                                color = getColor(cEle[0],clrScheme, "t");
+                            }
+
+                            
+                            let ff;
+                            if(family!=null){
+                                ff = fontFamilys[family];
+                            }
+                            if(rFont!=null){
+                                ff = rFont;
+                            }
+                            if(ff!=null){
+                                InlineString.ff = ff;
+                            }
+
+                            if(color!=null){
+                                InlineString.fc = color;
+                            }
+                            
+                            if(sz!=null){
+                                InlineString.fs = parseInt(sz);
+                            }
+
+                            if(strike!=null){
+                                InlineString.cl = parseInt(strike);
+                            }
+
+                            if(u!=null){
+                                InlineString.un = parseInt(u);
+                            }
+
+                            if(b!=null){
+                                InlineString.bl = parseInt(b);
+                            }
+
+                            if(i!=null){
+                                InlineString.it = parseInt(i);
+                            }
+
+                            if(vertAlign!=null){
+                                InlineString.va = parseInt(vertAlign);
+                            }
+
+
+                            // ff:string | undefined //font family
+                            // fc:string | undefined//font color
+                            // fs:number | undefined//font size
+                            // cl:number | undefined//strike
+                            // un:number | undefined//underline
+                            // bl:number | undefined//blod
+                            // it:number | undefined//italic
+                            // v:string | undefined
+                        }
+
+                        styles.push(InlineString);
                     });
-                    cellValue.v = text;
-                    quotePrefix = "1";
+
+                    let cellFormat = cellValue.ct;
+                    if(cellFormat==null){
+                        cellFormat = new LuckySheetCellFormat();
+                    }
+                    cellFormat.t = "inlineStr";
+                    cellFormat.s = styles;
+                    cellValue.ct = cellFormat;
                 }
             }
-            else if(t==ST_CellType["InlineString"] && v!=null){
+            // else if(t==ST_CellType["InlineString"] && v!=null){
     
-            }
+            // }
             else {
                 cellValue.v = value;
             }

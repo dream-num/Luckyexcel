@@ -6,13 +6,15 @@
         <link rel='stylesheet' href='./luckysheet/plugins/css/pluginsCss.css' />
         <link rel='stylesheet' href='./luckysheet/plugins/plugins.css' />
         <link rel='stylesheet' href='./luckysheet/css/luckysheet.css' />
+        <link rel='stylesheet' href='./luckysheet/assets/iconfont/iconfont.css' />
         <script src="./luckysheet/plugins/js/plugin.js"></script>
         <script src="./luckysheet/luckysheet.umd.js"></script>
         <script>
             $(function () {
                 //Configuration item
                 var options = {
-                    container: 'luckysheet' //luckysheet is the container id
+                    container: 'luckysheet', //luckysheet is the container id
+                    showinfobar:false,
                 }
                 luckysheet.create(options)
             });

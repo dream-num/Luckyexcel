@@ -221,20 +221,25 @@ export function getColor(color:Element, clrScheme:Element[], type:string="g"){
             let clrs = clrSchemeElement.getInnerElements("a:sysClr|a:srgbClr");
             if(clrs!=null){
                 let clr = clrs[0];
-                let attrList = clr.attributeList;
+                let clrAttrList = clr.attributeList;
+                console.log(clr.container, );
                 if(clr.container.indexOf("sysClr")>-1){
-                    if(type=="g" && attrList.val=="windowText"){
+                    if(type=="g" && clrAttrList.val=="windowText"){
                         bg = null;
                     }
-                    else if((type=="t" || type=="b") && attrList.val=="window"){
+                    else if((type=="t" || type=="b") && clrAttrList.val=="window"){
                         bg = null;
                     }
-                    else{
-                        bg = "#" + attrList.lastClr;
+                    else if(clrAttrList.val!=null){
+                        bg = "#" + clrAttrList.val;
+                    }
+                    else if(clrAttrList.lastClr!=null){
+                        bg = "#" + clrAttrList.lastClr;
                     }
                 }
                 else if(clr.container.indexOf("srgbClr")>-1){
-                    bg = "#" + attrList.val;
+                    console.log(clrAttrList.val);
+                    bg = "#" + clrAttrList.val;
                 }
             }
         }
@@ -249,4 +254,51 @@ export function getColor(color:Element, clrScheme:Element[], type:string="g"){
     }
 
     return bg;
+}
+
+
+/** 
+ * @dom xml attribute object
+ * @attr attribute name
+ * @d if attribute is null, return default value 
+ * @return attribute value
+*/
+export function getlineStringAttr(frpr:Element, attr:string):string{
+    let attrEle = frpr.getInnerElements(attr), value;
+
+    if(attrEle!=null && attrEle.length>0){
+        if(attr=="b" || attr=="i" || attr=="strike"){
+            value = "1";
+        }
+        else if(attr=="u"){
+            let v = attrEle[0].attributeList.val;
+            if(v=="double"){
+                value =  "2";
+            }
+            else if(v=="singleAccounting"){
+                value =  "3";
+            }
+            else if(v=="doubleAccounting"){
+                value =  "4";
+            }
+            else{
+                value = "1";
+            }
+        }
+        else if(attr=="vertAlign"){
+            let v = attrEle[0].attributeList.val;
+            if(v=="subscript"){
+                value = "1";
+            }
+            else if(v=="superscript"){
+                value = "2";
+            }
+        }
+        else{
+            value = attrEle[0].attributeList.val;
+        }
+        
+    }
+
+    return value;
 }
