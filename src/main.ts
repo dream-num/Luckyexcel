@@ -15,7 +15,23 @@ function demoHandler(){
             
             upload.addEventListener("change", function(evt){
                 var files:FileList = (evt.target as any).files;
+                if(files==null || files.length==0){
+                    alert("No files wait for import");
+                    return;
+                }
+
+                let name = files[0].name;
+                let suffix = name.split(".")[1];
+                if(suffix!="xlsx"){
+                    alert("Currently only supports the import of xlsx files");
+                    return;
+                }
                 LuckyExcel.transformExcelToLucky(files[0], function(exportJson:any, luckysheetfile:string){
+                    
+                    if(exportJson.sheets==null || exportJson.sheets.length==0){
+                        alert("Failed to read the content of the excel file, currently does not support xls files!");
+                        return;
+                    }
                     console.log(exportJson, luckysheetfile);
                     window.luckysheet.destroy();
                     
