@@ -235,7 +235,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
                     if(colors!=null && colors.length>0){
                         let color = colors[0];
-                        let fc = getColor(color, clrScheme, "t");
+                        let fc = getColor(color, this.styles, "t");
                         if(fc!=null){
                             cellValue.fc = fc;
                         }
@@ -500,6 +500,8 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                             text += t.value;
                         });
 
+                        text = this.replaceSpecialWrap(text);
+
                         if(text.indexOf("\r\n")>-1 || text.indexOf("\n")>-1){
                             let InlineString = new LuckyInlineString();
                             InlineString.v = text;
@@ -556,7 +558,9 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                         let InlineString = new LuckyInlineString();
 
                         if(tFlag!=null && tFlag.length>0){
-                            InlineString.v = tFlag[0].value;
+                            let text = tFlag[0].value;
+                            text = this.replaceSpecialWrap(text);
+                            InlineString.v = text;
                         }
 
                         if(rPr!=null && rPr.length>0){
@@ -566,7 +570,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
                             let cEle = frpr.getInnerElements("color");
                             if(cEle!=null && cEle.length>0){
-                                color = getColor(cEle[0],clrScheme, "t");
+                                color = getColor(cEle[0],this.styles, "t");
                             }
 
                             
@@ -648,6 +652,11 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
     
     }
 
+    private replaceSpecialWrap(text:string):string{
+        text = text.replace(/&#13;&#10;/g, "\r\n").replace(/&#13;/g, "\r").replace(/&#10;/g, "\n");
+        return text;
+    }
+
 
     private getBackgroundByFill(fill:Element, clrScheme:Element[]):string|null{
         let patternFills = fill.getInnerElements("patternFill");
@@ -658,12 +667,12 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
             let fg, bg;
             if(fgColors!=null){
                 let fgColor = fgColors[0];
-                fg = getColor(fgColor, clrScheme);
+                fg = getColor(fgColor, this.styles);
             }
 
             if(bgColors!=null){
                 let bgColor = bgColors[0];
-                bg = getColor(bgColor, clrScheme);
+                bg = getColor(bgColor, this.styles);
             }
             // console.log(fgColors,bgColors,clrScheme);
             if(fg!=null){
@@ -699,7 +708,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
         let colorRet = "#000000";
         if(colors!=null){
             let color = colors[0];
-            colorRet = getColor(color, clrScheme, "b");
+            colorRet = getColor(color, this.styles, "b");
             if(colorRet==null){
                 colorRet = "#000000";
             }

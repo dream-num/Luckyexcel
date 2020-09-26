@@ -34,7 +34,9 @@ export class LuckyFile extends LuckyFileBase {
         this.styles["fills"] =  this.readXml.getElementsByTagName("fills/fill", stylesFile);
         this.styles["borders"] =  this.readXml.getElementsByTagName("borders/border", stylesFile);
         this.styles["clrScheme"] =  this.readXml.getElementsByTagName("a:clrScheme/a:dk1|a:lt1|a:dk2|a:lt2|a:accent1|a:accent2|a:accent3|a:accent4|a:accent5|a:accent6|a:hlink|a:folHlink", theme1File);
-        
+        this.styles["indexedColors"] =  this.readXml.getElementsByTagName("colors/indexedColors/rgbColor", stylesFile);
+        this.styles["mruColors"] =  this.readXml.getElementsByTagName("colors/mruColors/color", stylesFile);
+
         let numfmts =  this.readXml.getElementsByTagName("numFmt/numFmt", stylesFile);
         let numFmtDefaultC = numFmtDefault;
         for(let i=0;i<numfmts.length;i++){

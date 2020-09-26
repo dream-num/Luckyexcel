@@ -182,7 +182,7 @@ export function getXmlAttibute(dom:IattributeList, attr:string, d:string){
  * @return pixel column width
 */
 export function getColumnWidthPixel(columnWidth:number){
-    let pix = Math.round(columnWidth * 8 + 5);
+    let pix = Math.round((columnWidth-0.83) * 8 + 5);
     return pix;
 }
 

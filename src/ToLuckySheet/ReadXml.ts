@@ -197,14 +197,38 @@ export interface IStyleCollections {
     [index:string]:Element[] | IattributeList
 }
 
+function combineIndexedColor(indexedColorsInner:Element[], indexedColors:IattributeList):IattributeList{
+    let ret:IattributeList = {};
+    if(indexedColorsInner==null || indexedColorsInner.length==0){
+        return indexedColors;
+    }
+    for(let key in indexedColors){
+        let value = indexedColors[key], kn = parseInt(key);
+        let inner = indexedColorsInner[kn];
+        if(inner==null){
+            ret[key] = value;
+        }
+        else{
+            let rgb = inner.attributeList.rgb;
+            ret[key] = rgb;
+        }
+    }
 
-export function getColor(color:Element, clrScheme:Element[], type:string="g"){
+    return ret;
+}
+
+//clrScheme:Element[]
+export function getColor(color:Element, styles:IStyleCollections , type:string="g"){
     let attrList = color.attributeList;
+    let clrScheme = styles["clrScheme"] as Element[];
+    let indexedColorsInner = styles["indexedColors"] as Element[];
+    let mruColorsInner = styles["mruColors"];
+    let indexedColorsList = combineIndexedColor(indexedColorsInner, indexedColors);
     let indexed = attrList.indexed, rgb = attrList.rgb, theme = attrList.theme, tint = attrList.tint;
     let bg;
     if(indexed!=null){
         let indexedNum = parseInt(indexed);
-        bg = indexedColors[indexedNum];
+        bg = indexedColorsList[indexedNum];
         if(bg!=null){
             bg = bg.substring(bg.length-6, bg.length);
             bg = "#"+bg;

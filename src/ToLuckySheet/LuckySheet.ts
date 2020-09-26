@@ -61,7 +61,7 @@ export class LuckySheet extends LuckySheetBase {
         if(tabColors!=null && tabColors.length>0){
             let tabColor = tabColors[0], attrList = tabColor.attributeList;
             if(attrList.rgb!=null){
-                let tc = getColor(tabColor, clrScheme, "b");
+                let tc = getColor(tabColor, this.styles, "b");
                 this.color = tc;
             }
         }
@@ -181,7 +181,7 @@ export class LuckySheet extends LuckySheetBase {
             let customWidth = getXmlAttibute(attrList, "customWidth", null);
 
 
-            if(min==null || max==null || customWidth==null){
+            if(min==null || max==null){
                 continue;
             }
 
