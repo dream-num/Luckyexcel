@@ -201,7 +201,10 @@ export class LuckySheet extends LuckySheetBase {
                     }
                     this.config.colhidden[m] = 0;
 
-                    delete this.config.columnlen[m];
+                    if(this.config.columnlen){
+                        delete this.config.columnlen[m];
+                    }
+                    
                 }
 
                 if(customWidth!=null){
@@ -244,8 +247,11 @@ export class LuckySheet extends LuckySheetBase {
                     this.config.rowhidden = {};
                 }
                 this.config.rowhidden[rowNoNum] = 0;
-
-                delete this.config.rowlen[rowNoNum];
+                
+                if(this.config.rowlen){
+                    delete this.config.rowlen[rowNoNum];
+                }
+                
             }
 
             if(customHeight!=null){
