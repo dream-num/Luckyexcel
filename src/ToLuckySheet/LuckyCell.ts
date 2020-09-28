@@ -113,7 +113,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 if(applyBorder!="0" && attrList.borderId!=null){
                     borderId = attrList.borderId;
                 }
-                if(applyAlignment!="0"){
+                if(applyAlignment!=null && applyAlignment!="0"){
                     let alignment = cellStyleXf.getInnerElements("alignment");
                     if(alignment!=null){
                         let attrList = alignment[0].attributeList;
