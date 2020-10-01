@@ -60,10 +60,10 @@ export class LuckySheet extends LuckySheetBase {
         let tabColors = this.readXml.getElementsByTagName("sheetPr/tabColor", sheetFile);
         if(tabColors!=null && tabColors.length>0){
             let tabColor = tabColors[0], attrList = tabColor.attributeList;
-            if(attrList.rgb!=null){
+            // if(attrList.rgb!=null){
                 let tc = getColor(tabColor, this.styles, "b");
                 this.color = tc;
-            }
+            // }
         }
 
         let sheetFormatPr = this.readXml.getElementsByTagName("sheetFormatPr", sheetFile);
