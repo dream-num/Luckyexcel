@@ -21,7 +21,7 @@ function demoHandler(){
                 }
 
                 let name = files[0].name;
-                let suffix = name.split(".")[1];
+                let suffixArr = name.split("."), suffix = suffixArr[suffixArr.length-1];
                 if(suffix!="xlsx"){
                     alert("Currently only supports the import of xlsx files");
                     return;
