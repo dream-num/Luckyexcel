@@ -240,29 +240,43 @@ export function getColor(color:Element, styles:IStyleCollections , type:string="
     }
     else if(theme!=null){
         let themeNum = parseInt(theme);
+        if(themeNum==0){
+            themeNum = 1;
+        }
+        else if(themeNum==1){
+            themeNum = 0;
+        }
+        else if(themeNum==2){
+            themeNum = 3;
+        }
+        else if(themeNum==3){
+            themeNum = 2;
+        }
         let clrSchemeElement = clrScheme[themeNum];
         if(clrSchemeElement!=null){
             let clrs = clrSchemeElement.getInnerElements("a:sysClr|a:srgbClr");
             if(clrs!=null){
                 let clr = clrs[0];
                 let clrAttrList = clr.attributeList;
-                console.log(clr.container, );
+                // console.log(clr.container, );
                 if(clr.container.indexOf("sysClr")>-1){
-                    if(type=="g" && clrAttrList.val=="windowText"){
-                        bg = null;
-                    }
-                    else if((type=="t" || type=="b") && clrAttrList.val=="window"){
-                        bg = null;
+                    // if(type=="g" && clrAttrList.val=="windowText"){
+                    //     bg = null;
+                    // }
+                    // else if((type=="t" || type=="b") && clrAttrList.val=="window"){
+                    //     bg = null;
+                    // }                    
+                    // else 
+                    if(clrAttrList.lastClr!=null){
+                        bg = "#" + clrAttrList.lastClr;
                     }
                     else if(clrAttrList.val!=null){
                         bg = "#" + clrAttrList.val;
                     }
-                    else if(clrAttrList.lastClr!=null){
-                        bg = "#" + clrAttrList.lastClr;
-                    }
+
                 }
                 else if(clr.container.indexOf("srgbClr")>-1){
-                    console.log(clrAttrList.val);
+                    // console.log(clrAttrList.val);
                     bg = "#" + clrAttrList.val;
                 }
             }

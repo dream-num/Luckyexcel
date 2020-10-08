@@ -22,7 +22,7 @@ export class HandleZip{
             zip.forEach(function (relativePath:any, zipEntry:any) {  // 2) print entries
                 zipEntry.async("string").then(function (data:string) {
                     fileList[zipEntry.name] = data;
-                    console.log(lastIndex, index);
+                    // console.log(lastIndex, index);
                     if(lastIndex==index+1){
                         successFunc(fileList);
                     }

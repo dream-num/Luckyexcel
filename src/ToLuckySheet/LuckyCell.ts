@@ -1,6 +1,6 @@
 import { IluckySheetborderInfoCellForImp,IluckySheetCelldataValue,IluckySheetCelldataValueMerge,ILuckySheetCellFormat } from "./ILuck";
 import { ReadXml, Element, IStyleCollections,getColor,getlineStringAttr } from "./ReadXml";
-import {getXmlAttibute, getColumnWidthPixel, getRowHeightPixel,getcellrange, escapeCharacter} from "../common/method";
+import {getXmlAttibute, getColumnWidthPixel, getRowHeightPixel,getcellrange, escapeCharacter, isChinese, isJapanese, isKoera,isContainMultiType} from "../common/method";
 import { ST_CellType, indexedColors, OEM_CHARSET,borderTypes,fontFamilys } from "../common/constant"
 import { IattributeList, stringToNum } from "../ICommon";
 import { LuckySheetborderInfoCellValueStyle,LuckySheetborderInfoCellForImp,LuckySheetborderInfoCellValue,LuckySheetCelldataBase,LuckySheetCelldataValue,LuckySheetCellFormat,LuckyInlineString } from "./LuckyBase";
@@ -75,7 +75,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
         }
 
-
+        let familyFont = null;
         let quotePrefix;
         if(s!=null){
             let sNum = parseInt(s);
@@ -211,6 +211,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 }
             }
 
+            
             if(fontId!=undefined){
                 let fontIdNum = parseInt(fontId);
                 let font = fonts[fontIdNum];
@@ -241,22 +242,21 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                         }
                     }
 
-                    let ff;
+                    
                     if(familyOverrides!=null && familyOverrides.length>0){
                         let val = familyOverrides[0].attributeList.val;
                         if(val!=null){
-                            ff = fontFamilys[val];
+                            familyFont = fontFamilys[val];
                         }
                     }
+
                     if(family!=null && family.length>0){
                         let val = family[0].attributeList.val;
                         if(val!=null){
-                            ff = val;
+                            cellValue.ff = val;
                         }
                     }
-                    if(ff!=null){
-                        cellValue.ff = ff;
-                    }
+                
 
                     if(bolds!=null && bolds.length>0){
                         let bold = bolds[0].attributeList.val;
@@ -487,6 +487,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
         if(v!=null){
             let value =v[0].value;
+            
             if(t==ST_CellType["SharedString"]){
                 let siIndex = parseInt(v[0].value);
                 let sharedSI = sharedStrings[siIndex];
@@ -494,57 +495,194 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 let rFlag = sharedSI.getInnerElements("r");
                 if(rFlag==null){
                     let tFlag = sharedSI.getInnerElements("t");
-                    if(tFlag!=null){
+                    if(tFlag!=null){                            
                         let text = "";
                         tFlag.forEach((t)=>{
                             text += t.value;
                         });
 
-                        text = this.replaceSpecialWrap(text);
+                        text = escapeCharacter(text);
 
-                        if(text.indexOf("\r\n")>-1 || text.indexOf("\n")>-1){
-                            let InlineString = new LuckyInlineString();
-                            InlineString.v = text;
+                        //isContainMultiType(text) &&
+                        if(familyFont=="Roman" && text.length>0){
+                            let textArray = text.split("");
+                            let preWordType:string = null, wordText="", preWholef:string=null;
+                            let wholef = "Times New Roman";
+                            if(cellValue.ff!=null){
+                                wholef = cellValue.ff;
+                            }
+
                             let cellFormat = cellValue.ct;
                             if(cellFormat==null){
                                 cellFormat = new LuckySheetCellFormat();
                             }
 
-                            if(cellValue.ff!=null){
-                                InlineString.ff = cellValue.ff;
-                            }
-
-                            if(cellValue.fc!=null){
-                                InlineString.fc = cellValue.fc;
+                            if(cellFormat.s==null){
+                                cellFormat.s = [];
                             }
                             
-                            if(cellValue.fs!=null){
-                                InlineString.fs = cellValue.fs;
-                            }
+                            for(let i=0;i<textArray.length;i++){
+                                let w = textArray[i];
+                                let type:string = null, ff=wholef;
 
-                            if(cellValue.cl!=null){
-                                InlineString.cl = cellValue.cl;
-                            }
+                                if(isChinese(w)){
+                                    type = "c";
+                                    ff="宋体";
+                                }
+                                else if(isJapanese(w)){
+                                    type = "j";
+                                    ff="Yu Gothic";
+                                }
+                                else if(isKoera(w)){
+                                    type = "k";
+                                    ff="Malgun Gothic";
+                                }
+                                else{
+                                    type = "e";
+                                }
 
-                            if(cellValue.un!=null){
-                                InlineString.un = cellValue.un;
-                            }
+                                if((type!=preWordType && preWordType!=null) || i==textArray.length-1){
+                                    let InlineString = new LuckyInlineString();
 
-                            if(cellValue.bl!=null){
-                                InlineString.bl = cellValue.bl;
-                            }
+                                    InlineString.ff = preWholef;
+        
+                                    if(cellValue.fc!=null){
+                                        InlineString.fc = cellValue.fc;
+                                    }
+                                    
+                                    if(cellValue.fs!=null){
+                                        InlineString.fs = cellValue.fs;
+                                    }
+        
+                                    if(cellValue.cl!=null){
+                                        InlineString.cl = cellValue.cl;
+                                    }
+        
+                                    if(cellValue.un!=null){
+                                        InlineString.un = cellValue.un;
+                                    }
+        
+                                    if(cellValue.bl!=null){
+                                        InlineString.bl = cellValue.bl;
+                                    }
+        
+                                    if(cellValue.it!=null){
+                                        InlineString.it = cellValue.it;
+                                    }
 
-                            if(cellValue.it!=null){
-                                InlineString.it = cellValue.it;
+                                    if(i==textArray.length-1){
+                                        if(type==preWordType){
+                                            InlineString.ff = ff;
+                                            InlineString.v = wordText + w;
+                                        }
+                                        else{
+                                            InlineString.ff = preWholef;
+                                            InlineString.v = wordText;
+                                            cellFormat.s.push(InlineString);
+
+                                            let InlineStringLast = new LuckyInlineString();
+                                            InlineStringLast.ff = ff;
+                                            InlineStringLast.v = w;
+                                            if(cellValue.fc!=null){
+                                                InlineStringLast.fc = cellValue.fc;
+                                            }
+                                            
+                                            if(cellValue.fs!=null){
+                                                InlineStringLast.fs = cellValue.fs;
+                                            }
+                
+                                            if(cellValue.cl!=null){
+                                                InlineStringLast.cl = cellValue.cl;
+                                            }
+                
+                                            if(cellValue.un!=null){
+                                                InlineStringLast.un = cellValue.un;
+                                            }
+                
+                                            if(cellValue.bl!=null){
+                                                InlineStringLast.bl = cellValue.bl;
+                                            }
+                
+                                            if(cellValue.it!=null){
+                                                InlineStringLast.it = cellValue.it;
+                                            }
+                                            cellFormat.s.push(InlineStringLast);
+
+                                            break;
+                                        }
+                                    }
+                                    else{
+                                        InlineString.v = wordText;
+                                    }
+                                    
+
+                                    cellFormat.s.push(InlineString);
+
+                                    wordText = w;
+                                }
+                                else{
+                                    wordText += w;
+                                }
+
+
+                                preWordType = type;
+                                preWholef = ff;
                             }
 
                             cellFormat.t = "inlineStr";
-                            cellFormat.s = [InlineString];
+                            // cellFormat.s = [InlineString];
                             cellValue.ct = cellFormat;
+                            // console.log(cellValue);
                         }
                         else{
-                            cellValue.v = text;
-                            quotePrefix = "1";
+
+    
+                            text = this.replaceSpecialWrap(text);
+    
+                            if(text.indexOf("\r\n")>-1 || text.indexOf("\n")>-1){
+                                let InlineString = new LuckyInlineString();
+                                InlineString.v = text;
+                                let cellFormat = cellValue.ct;
+                                if(cellFormat==null){
+                                    cellFormat = new LuckySheetCellFormat();
+                                }
+    
+                                if(cellValue.ff!=null){
+                                    InlineString.ff = cellValue.ff;
+                                }
+    
+                                if(cellValue.fc!=null){
+                                    InlineString.fc = cellValue.fc;
+                                }
+                                
+                                if(cellValue.fs!=null){
+                                    InlineString.fs = cellValue.fs;
+                                }
+    
+                                if(cellValue.cl!=null){
+                                    InlineString.cl = cellValue.cl;
+                                }
+    
+                                if(cellValue.un!=null){
+                                    InlineString.un = cellValue.un;
+                                }
+    
+                                if(cellValue.bl!=null){
+                                    InlineString.bl = cellValue.bl;
+                                }
+    
+                                if(cellValue.it!=null){
+                                    InlineString.it = cellValue.it;
+                                }
+    
+                                cellFormat.t = "inlineStr";
+                                cellFormat.s = [InlineString];
+                                cellValue.ct = cellFormat;
+                            }
+                            else{
+                                cellValue.v = text;
+                                quotePrefix = "1";
+                            }
                         }
 
                     }
@@ -560,6 +698,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                         if(tFlag!=null && tFlag.length>0){
                             let text = tFlag[0].value;
                             text = this.replaceSpecialWrap(text);
+                            text = escapeCharacter(text);
                             InlineString.v = text;
                         }
 
@@ -575,38 +714,59 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
                             
                             let ff;
-                            if(family!=null){
-                                ff = fontFamilys[family];
-                            }
+                            // if(family!=null){
+                            //     ff = fontFamilys[family];
+                            // }
                             if(rFont!=null){
                                 ff = rFont;
                             }
                             if(ff!=null){
                                 InlineString.ff = ff;
                             }
+                            else if(cellValue.ff!=null){
+                                InlineString.ff = cellValue.ff;
+                            }
 
                             if(color!=null){
                                 InlineString.fc = color;
+                            }
+                            else if(cellValue.fc!=null){
+                                InlineString.fc = cellValue.fc;
                             }
                             
                             if(sz!=null){
                                 InlineString.fs = parseInt(sz);
                             }
+                            else if(cellValue.fs!=null){
+                                InlineString.fs = cellValue.fs;
+                            }
 
                             if(strike!=null){
                                 InlineString.cl = parseInt(strike);
+                            }
+                            else if(cellValue.cl!=null){
+                                InlineString.cl = cellValue.cl;
                             }
 
                             if(u!=null){
                                 InlineString.un = parseInt(u);
                             }
+                            else if(cellValue.un!=null){
+                                InlineString.un = cellValue.un;
+                            }
 
                             if(b!=null){
                                 InlineString.bl = parseInt(b);
                             }
+                            else if(cellValue.bl!=null){
+                                InlineString.bl = cellValue.bl;
+                            }
 
                             if(i!=null){
                                 InlineString.it = parseInt(i);
+                            }
+                            else if(cellValue.it!=null){
+                                InlineString.it = cellValue.it;
                             }
 
                             if(vertAlign!=null){
@@ -623,6 +783,36 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                             // it:number | undefined//italic
                             // v:string | undefined
                         }
+                        else{
+                            if(InlineString.ff==null && cellValue.ff!=null){
+                                InlineString.ff = cellValue.ff;
+                            }
+    
+                            if(InlineString.fc==null && cellValue.fc!=null){
+                                InlineString.fc = cellValue.fc;
+                            }
+                            
+                            if(InlineString.fs==null && cellValue.fs!=null){
+                                InlineString.fs = cellValue.fs;
+                            }
+    
+                            if(InlineString.cl==null && cellValue.cl!=null){
+                                InlineString.cl = cellValue.cl;
+                            }
+    
+                            if(InlineString.un==null && cellValue.un!=null){
+                                InlineString.un = cellValue.un;
+                            }
+    
+                            if(InlineString.bl==null && cellValue.bl!=null){
+                                InlineString.bl = cellValue.bl;
+                            }
+    
+                            if(InlineString.it==null && cellValue.it!=null){
+                                InlineString.it = cellValue.it;
+                            }
+                        }
+
 
                         styles.push(InlineString);
                     });
@@ -640,6 +830,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
     
             // }
             else {
+                value = escapeCharacter(value);
                 cellValue.v = value;
             }
         }
