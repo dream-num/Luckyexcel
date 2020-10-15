@@ -866,3 +866,113 @@ export function isContainMultiType(str:string):boolean {
     return false;
 
 }
+
+
+
+
+
+
+
+
+export function getBinaryContent (path:any, options:any) {
+    let promise, resolve:any, reject:any;
+    let callback:any;
+
+    if (!options) {
+        options = {};
+    }
+
+    // taken from jQuery
+    let createStandardXHR = function () {
+        try {
+            return new window.XMLHttpRequest();
+        } catch( e ) {}
+    }
+
+    let createActiveXHR = function () {
+        try {
+            return new window.ActiveXObject("Microsoft.XMLHTTP");
+        } catch( e ) {}
+    }
+
+    // Create the request object
+    var createXHR = (typeof window !== "undefined" && window.ActiveXObject) ?
+        /* Microsoft failed to properly
+        * implement the XMLHttpRequest in IE7 (can't request local files),
+        * so we use the ActiveXObject when it is available
+        * Additionally XMLHttpRequest can be disabled in IE7/IE8 so
+        * we need a fallback.
+        */
+        function() {
+        return createStandardXHR() || createActiveXHR();
+    } :
+        // For all other browsers, use the standard XMLHttpRequest object
+        createStandardXHR;
+
+    // backward compatible callback
+    if (typeof options === "function") {
+        callback = options;
+        options = {};
+    } else if (typeof options.callback === 'function') {
+        // callback inside options object
+        callback = options.callback;
+    }
+
+    resolve = function (data:any) { callback(null, data); };
+    reject = function (err:any) { callback(err, null); };
+
+    try {
+        var xhr = createXHR();
+
+        xhr.open('GET', path, true);
+
+        // recent browsers
+        if ("responseType" in xhr) {
+            xhr.responseType = "arraybuffer";
+        }
+
+        // older browser
+        if(xhr.overrideMimeType) {
+            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        }
+
+        xhr.onreadystatechange = function (event:Event) {
+            // use `xhr` and not `this`... thanks IE
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || xhr.status === 0) {
+                    try {
+                        resolve(function (xhr:XMLHttpRequest) {
+                            // for xhr.responseText, the 0xFF mask is applied by JSZip
+                            return xhr.response || xhr.responseText;
+                        }(xhr));
+                    } catch(err) {
+                        reject(new Error(err));
+                    }
+                } else {
+                    reject(new Error("Ajax error for " + path + " : " + this.status + " " + this.statusText));
+                }
+            }
+        };
+
+        if(options.progress) {
+            xhr.onprogress = function(e:any) {
+                options.progress({
+                    path: path,
+                    originalEvent: e,
+                    percent: e.loaded / e.total * 100,
+                    loaded: e.loaded,
+                    total: e.total
+                });
+            };
+        }
+
+        xhr.send();
+
+    } catch (e) {
+        reject(new Error(e), null);
+    }
+
+    // returns a promise or undefined depending on whether a callback was
+    // provided
+    return promise;
+}

@@ -9,6 +9,7 @@ import { LuckySheet } from "./ToLuckySheet/LuckySheet";
 //demo
 function demoHandler(){
     let upload = document.getElementById("Luckyexcel-demo-file");
+    let selectADemo = document.getElementById("Luckyexcel-select-demo");
     if(upload){
         
         window.onload = () => {
@@ -44,6 +45,33 @@ function demoHandler(){
                     });
                 });
             });
+
+            selectADemo.addEventListener("change", function(evt){
+                var obj:any = selectADemo; //定位id
+                var index = obj.selectedIndex; // 选中索引
+                var value = obj.options[index].value; // 选中值
+                var name = obj.options[index].innerHTML;
+                if(value==""){
+                    return;
+                }
+                LuckyExcel.transformExcelToLuckyByUrl(value, name, function(exportJson:any, luckysheetfile:string){
+                    
+                    if(exportJson.sheets==null || exportJson.sheets.length==0){
+                        alert("Failed to read the content of the excel file, currently does not support xls files!");
+                        return;
+                    }
+                    console.log(exportJson, luckysheetfile);
+                    window.luckysheet.destroy();
+                    
+                    window.luckysheet.create({
+                        container: 'luckysheet', //luckysheet is the container id
+                        showinfobar:false,
+                        data:exportJson.sheets,
+                        title:exportJson.info.name,
+                        userInfo:exportJson.info.name.creator
+                    });
+                });
+            });
         }
     }
 }
@@ -61,6 +89,21 @@ export class LuckyExcel{
                 callBack(exportJson, luckysheetfile);
             }
             
+        },
+        function(err:Error){
+            console.error(err);
+        });
+    }
+
+    static transformExcelToLuckyByUrl(url:string, name:string, callBack?:(files:IuploadfileList, fs?:string)=>void){
+        let handleZip:HandleZip = new HandleZip(null);
+        handleZip.unzipFileByUrl(url, function(files:IuploadfileList){
+            let luckyFile = new LuckyFile(files, name);
+            let luckysheetfile = luckyFile.Parse();
+            let exportJson = JSON.parse(luckysheetfile);
+            if(callBack != undefined){
+                callBack(exportJson, luckysheetfile);
+            }
         },
         function(err:Error){
             console.error(err);
