@@ -16,11 +16,21 @@ export class HandleZip{
 
     unzipFile(successFunc:(file:IuploadfileList)=>void, errorFunc:(err:Error)=>void):void { 
         var new_zip:JSZip = new JSZip();
-        new_zip.loadAsync(this.uploadFile)                                   // 1) read the Blob
+        new_zip.loadAsync(this.uploadFile,{base64: true})                                   // 1) read the Blob
         .then(function(zip:any) {
             let fileList:IuploadfileList = <IuploadfileList>{}, lastIndex:number = Object.keys(zip.files).length, index:number=0;
             zip.forEach(function (relativePath:any, zipEntry:any) {  // 2) print entries
-                zipEntry.async("string").then(function (data:string) {
+                let fileName = zipEntry.name;
+                let fileNameArr = fileName.split(".");
+                let suffix = fileNameArr[fileNameArr.length-1].toLowerCase();
+                let fileType = "string";
+                if(suffix in {"png":1, "jpeg":1, "jpg":1, "gif":1,"bmp":1,"tif":1,"webp":1,}){
+                    fileType = "base64";
+                }
+                zipEntry.async(fileType).then(function (data:string) {
+                    if(fileType=="base64"){
+                        data = "data:image/"+ suffix +";base64," + data;
+                    }
                     fileList[zipEntry.name] = data;
                     // console.log(lastIndex, index);
                     if(lastIndex==index+1){

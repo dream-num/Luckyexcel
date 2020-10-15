@@ -166,6 +166,27 @@ function chatatABC(index:number) {
 }
 
 /** 
+ * @return ratio, default 0.75 1in = 2.54cm = 25.4mm = 72pt = 6pc,  pt = 1/72 In, px = 1/dpi In
+*/
+export function getptToPxRatioByDPI():number{
+    return 72/96;
+}
+
+/** 
+ * @emus EMUs, Excel drawing unit
+ * @return pixel
+*/
+export function getPxByEMUs(emus:number){
+    if(emus==null){
+        return 0;
+    }
+    let inch = emus/914400;
+    let pt = inch*72;
+    let px = pt / getptToPxRatioByDPI();
+    return px;
+}
+
+/** 
  * @dom xml attribute object
  * @attr attribute name
  * @d if attribute is null, return default value 
@@ -182,7 +203,7 @@ export function getXmlAttibute(dom:IattributeList, attr:string, d:string){
  * @return pixel column width
 */
 export function getColumnWidthPixel(columnWidth:number){
-    let pix = Math.round((columnWidth-0.83) * 8 + 5);
+    let pix = Math.round((columnWidth-0.62) * 8 + 5);
     return pix;
 }
 
@@ -191,7 +212,7 @@ export function getColumnWidthPixel(columnWidth:number){
  * @return pixel row height
 */
 export function getRowHeightPixel(rowHeight:number){
-    let pix = Math.round(rowHeight/0.75);
+    let pix = Math.round(rowHeight/getptToPxRatioByDPI());
     return pix;
 }
 
@@ -363,7 +384,7 @@ function rgbToHsl(r:number, g:number, b:number) {
     return [h, s, l];
 }
  
-export function generateRandomSheetIndex(prefix:string):string {
+export function generateRandomIndex(prefix:string):string {
     if(prefix == null){
         prefix = "Sheet";
     }

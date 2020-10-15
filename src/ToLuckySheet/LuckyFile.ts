@@ -1,11 +1,11 @@
-﻿import { ILuckyFile} from "./ILuck";
+﻿import { ILuckyFile,IluckySheetRowAndColumnHidden,IluckySheetRowAndColumnLen} from "./ILuck";
 import { LuckySheet} from "./LuckySheet";
 import {IuploadfileList, IattributeList} from "../ICommon";
 import {workBookFile, coreFile, appFile, stylesFile, sharedStringsFile,numFmtDefault,theme1File,calcChainFile,workbookRels} from "../common/constant";
 import { ReadXml,IStyleCollections,Element } from "./ReadXml";
 import {getXmlAttibute} from "../common/method";
 import { LuckyFileBase,LuckyFileInfo,LuckySheetBase,LuckySheetCelldataBase,LuckySheetCelldataValue,LuckySheetCellFormat } from "./LuckyBase";
-
+import {ImageList,Image} from "./LuckyImage";
 
 export class LuckyFile extends LuckyFileBase {
 
@@ -16,6 +16,7 @@ export class LuckyFile extends LuckyFileBase {
     private styles:IStyleCollections
     private sharedStrings:Element[]
     private calcChain:Element[]
+    private imageList:ImageList
 
     constructor(files:IuploadfileList, fileName:string) { 
         super();
@@ -36,6 +37,8 @@ export class LuckyFile extends LuckyFileBase {
         this.styles["clrScheme"] =  this.readXml.getElementsByTagName("a:clrScheme/a:dk1|a:lt1|a:dk2|a:lt2|a:accent1|a:accent2|a:accent3|a:accent4|a:accent5|a:accent6|a:hlink|a:folHlink", theme1File);
         this.styles["indexedColors"] =  this.readXml.getElementsByTagName("colors/indexedColors/rgbColor", stylesFile);
         this.styles["mruColors"] =  this.readXml.getElementsByTagName("colors/mruColors/color", stylesFile);
+
+        this.imageList = new ImageList(files);
 
         let numfmts =  this.readXml.getElementsByTagName("numFmt/numFmt", stylesFile);
         let numFmtDefaultC = numFmtDefault;
@@ -128,12 +131,184 @@ export class LuckyFile extends LuckyFileBase {
             let sheetId = sheet.attributeList["sheetId"]; 
             let rid = sheet.attributeList["r:id"]; 
             let sheetFile = this.getSheetFileBysheetId(rid);
-            if(sheetFile!=null){
-                this.sheets.push(new LuckySheet(sheetName, sheetId, order, sheetFile,this.readXml, sheetList, this.styles, this.sharedStrings, this.calcChain,isInitialCell));
 
+            let drawing = this.readXml.getElementsByTagName("worksheet/drawing", sheetFile), drawingFile, drawingRelsFile;
+            if(drawing!=null && drawing.length>0){
+                let attrList = drawing[0].attributeList;
+                let rid = getXmlAttibute(attrList, "r:id", null);
+                if(rid!=null){
+                    drawingFile = this.getDrawingFile(rid, sheetFile);
+                    drawingRelsFile = this.getDrawingRelsFile(drawingFile);
+                }
+            }
+  
+            if(sheetFile!=null){
+                let sheet = new LuckySheet(sheetName, sheetId, order, isInitialCell,
+                    {
+                        sheetFile:sheetFile,
+                        readXml:this.readXml, 
+                        sheetList:sheetList, 
+                        styles:this.styles, 
+                        sharedStrings:this.sharedStrings, 
+                        calcChain:this.calcChain, 
+                        imageList:this.imageList,
+                        drawingFile:drawingFile,
+                        drawingRelsFile:drawingRelsFile,
+                    }
+                )
+
+                this.columnWidthSet = [];
+                this.rowHeightSet = [];
+
+                this.imagePositionCaculation(sheet);
+
+                this.sheets.push(sheet);
                 order++;
             }
         }
+    }
+
+    private columnWidthSet:number[] = [];
+    private rowHeightSet:number[] = [];
+
+    private extendArray(index:number, sets:number[],def:number, hidden:IluckySheetRowAndColumnHidden, lens:IluckySheetRowAndColumnLen){
+        if(index<sets.length){
+            return;
+        }
+
+        let startIndex = sets.length, endIndex = index;
+        let allGap = 0;
+        if(startIndex>0){
+            allGap = sets[startIndex-1];
+        }
+        else{
+            sets.push(0);
+        }
+        for(let i=startIndex;i<=endIndex;i++){
+            let gap = def, istring  = i.toString();
+            if(istring in hidden){
+                gap = 0;
+            }
+            else if(istring in lens){
+                gap = lens[istring];
+            }
+
+            allGap += Math.round(gap + 1);
+
+            sets.push(allGap);
+        }
+    }
+    
+    private imagePositionCaculation(sheet:LuckySheet){
+        let images = sheet.images, defaultColWidth = sheet.defaultColWidth, defaultRowHeight = sheet.defaultRowHeight;
+        let colhidden = {};
+        if(sheet.config.colhidden){
+            colhidden = sheet.config.colhidden;
+        }
+
+        let columnlen = {};
+        if(sheet.config.columnlen){
+            columnlen = sheet.config.columnlen;
+        }
+
+        let rowhidden = {};
+        if(sheet.config.rowhidden){
+            rowhidden = sheet.config.rowhidden;
+        }
+
+        let rowlen = {};
+        if(sheet.config.rowlen){
+            rowlen = sheet.config.rowlen;
+        }
+        
+        for(let key in images){
+            let imageObject:any = images[key];//Image, luckyImage
+            let fromCol = imageObject.fromCol;
+            let fromColOff = imageObject.fromColOff;
+            let fromRow = imageObject.fromRow;
+            let fromRowOff = imageObject.fromRowOff;
+
+            let toCol = imageObject.toCol;
+            let toColOff = imageObject.toColOff;
+            let toRow = imageObject.toRow;
+            let toRowOff = imageObject.toRowOff;
+
+            let x_n =0,y_n = 0;
+            let cx_n = 0, cy_n = 0; 
+
+            if(fromCol>=this.columnWidthSet.length){
+                this.extendArray(fromCol, this.columnWidthSet, defaultColWidth, colhidden, columnlen);
+            }
+            x_n = this.columnWidthSet[fromCol] + fromColOff;
+            if(fromRow>=this.rowHeightSet.length){
+                this.extendArray(fromRow, this.rowHeightSet, defaultRowHeight, rowhidden, rowlen);
+            }
+            y_n = this.rowHeightSet[fromRow] + fromRowOff;
+
+
+            if(toCol>=this.columnWidthSet.length){
+                this.extendArray(toCol, this.columnWidthSet, defaultColWidth, colhidden, columnlen);
+            }
+            cx_n = this.columnWidthSet[toCol] + toColOff - x_n;
+            if(toRow>=this.rowHeightSet.length){
+                this.extendArray(toRow, this.rowHeightSet, defaultRowHeight, rowhidden, rowlen);
+            }
+            cy_n = this.rowHeightSet[toRow] + toRowOff - y_n;
+
+            console.log(fromCol, this.columnWidthSet[fromCol] , fromColOff);
+            console.log(toCol, this.columnWidthSet[toCol] , toColOff, JSON.stringify(this.columnWidthSet));
+
+            imageObject.originWidth = cx_n;
+            imageObject.originHeight = cy_n;
+
+            imageObject.crop.height = cy_n;
+            imageObject.crop.width = cx_n;
+
+            imageObject.default.height = cy_n;
+            imageObject.default.left = x_n;
+            imageObject.default.top = y_n;
+            imageObject.default.width = cx_n;
+        }
+
+        console.log(this.columnWidthSet, this.rowHeightSet);
+    }
+
+    /**
+    * @return drawing file string
+    */
+   private getDrawingFile(rid:string, sheetFile:string):string{
+        let sheetRelsPath = "xl/worksheets/_rels/";
+        let sheetFileArr = sheetFile.split("/");
+        let sheetRelsName = sheetFileArr[sheetFileArr.length-1];
+
+        let sheetRelsFile = sheetRelsPath + sheetRelsName + ".rels";
+
+        let drawing = this.readXml.getElementsByTagName("Relationships/Relationship", sheetRelsFile);
+        if(drawing.length>0){
+            for(let i=0;i<drawing.length;i++){
+                let relationship = drawing[i];
+                let attrList = relationship.attributeList;
+                let relationshipId = getXmlAttibute(attrList, "Id", null);
+                if(relationshipId==rid){
+                    let target = getXmlAttibute(attrList, "Target", null);
+                    if(target!=null){
+                        return target.replace(/\.\.\//g, "");
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+    
+    private getDrawingRelsFile(drawingFile:string):string{
+        let drawingRelsPath = "xl/drawings/_rels/";
+        let drawingFileArr = drawingFile.split("/");
+        let drawingRelsName = drawingFileArr[drawingFileArr.length-1];
+
+        let drawingRelsFile = drawingRelsPath + drawingRelsName + ".rels";
+
+        return drawingRelsFile;
     }
 
     /**
@@ -182,7 +357,7 @@ export class LuckyFile extends LuckyFileBase {
         return this.toJsonString(this);
     }
 
-    toJsonString(file:ILuckyFile):string{
+    private toJsonString(file:ILuckyFile):string{
         let LuckyOutPutFile = new LuckyFileBase();
         LuckyOutPutFile.info = file.info;
         LuckyOutPutFile.sheets = [];
@@ -288,6 +463,10 @@ export class LuckyFile extends LuckyFileBase {
 
             if(sheet.calcChain!=null){
                 sheetout.calcChain = sheet.calcChain;
+            }
+
+            if(sheet.images!=null){
+                sheetout.images = sheet.images;
             }
             
             LuckyOutPutFile.sheets.push(sheetout);

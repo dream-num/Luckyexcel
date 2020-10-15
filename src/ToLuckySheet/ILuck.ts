@@ -46,6 +46,8 @@ export interface IluckySheet{
     defaultColWidth:number, //cloumn width pixel
     defaultRowHeight:number, //row height pixel
 
+    images:IluckyImages,//image list
+
 }
 
 //luckysheet general selection
@@ -282,4 +284,46 @@ export interface ILuckyInlineString {
     it:number | undefined//italic
     va:number | undefined//1sub and 2super and 0none
     v:string | undefined
+}
+
+
+
+//Image
+export interface IluckyImage {
+    border: IluckyImageBorder
+    crop: IluckyImageCrop
+    default: IluckyImageDefault
+
+    fixedLeft: number
+    fixedTop: number
+    isFixedPos: Boolean
+    originHeight: number
+    originWidth: number
+    src: string
+    type: string
+}
+
+export interface IluckyImageBorder {
+    color: string
+    radius: number
+    style: string
+    width: number
+}
+
+export interface IluckyImageCrop {
+    height: number
+    offsetLeft: number
+    offsetTop: number
+    width: number
+}
+
+export interface IluckyImageDefault {
+    height: number
+    left: number
+    top: number
+    width: number
+}
+
+export interface IluckyImages {
+    [index:string]:IluckyImage
 }

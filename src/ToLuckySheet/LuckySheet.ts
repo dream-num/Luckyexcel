@@ -1,11 +1,11 @@
-﻿import { IluckySheetChart,IluckySheetPivotTable,IluckysheetConditionFormat,IluckysheetCalcChain,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IluckysheetFrozen} from "./ILuck";
+﻿import { IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IluckysheetFrozen} from "./ILuck";
 import {LuckySheetCelldata} from "./LuckyCell";
 import { IattributeList } from "../ICommon";
-import {getXmlAttibute, getColumnWidthPixel, fromulaRef,getRowHeightPixel,getcellrange,generateRandomSheetIndex} from "../common/method";
+import {getXmlAttibute, getColumnWidthPixel, fromulaRef,getRowHeightPixel,getcellrange,generateRandomIndex,getPxByEMUs} from "../common/method";
 import {borderTypes} from "../common/constant";
 import { ReadXml, IStyleCollections, Element,getColor } from "./ReadXml";
 import { LuckyFileBase,LuckySheetBase,LuckyConfig,LuckySheetborderInfoCellForImp,LuckySheetborderInfoCellValue,LuckysheetCalcChain,LuckySheetConfigMerge } from "./LuckyBase";
-
+import {ImageList} from "./LuckyImage";
 
 export class LuckySheet extends LuckySheetBase {
 
@@ -16,18 +16,24 @@ export class LuckySheet extends LuckySheetBase {
     private sharedStrings:Element[]
     private mergeCells:Element[]
     private calcChainEles:Element[]
+    private sheetList:IattributeList
+
+    private imageList:ImageList
 
     private formulaRefList:IFormulaSI
 
-    constructor(sheetName:string, sheetId:string, sheetOrder:number,sheetFile:string, ReadXml:ReadXml, sheets:IattributeList, styles:IStyleCollections, sharedStrings:Element[], calcChain:Element[],isInitialCell:boolean=false){
+    constructor(sheetName:string, sheetId:string, sheetOrder:number,isInitialCell:boolean=false, allFileOption:any){
         //Private
         super();
-        this.readXml = ReadXml;
-        this.sheetFile = sheetFile;
         this.isInitialCell = isInitialCell;
-        this.styles = styles;
-        this.sharedStrings = sharedStrings;
-        this.calcChainEles = calcChain;
+
+        this.readXml = allFileOption.readXml;
+        this.sheetFile = allFileOption.sheetFile;
+        this.styles = allFileOption.styles;
+        this.sharedStrings = allFileOption.sharedStrings;
+        this.calcChainEles = allFileOption.calcChain;
+        this.sheetList = allFileOption.sheetList;
+        this.imageList = allFileOption.imageList;  
 
         //Output
         this.name = sheetName;
@@ -35,9 +41,9 @@ export class LuckySheet extends LuckySheetBase {
         this.order = sheetOrder.toString();
         this.config = new LuckyConfig();
         this.celldata = [];
-        this.mergeCells = this.readXml.getElementsByTagName("mergeCells/mergeCell", sheetFile);
+        this.mergeCells = this.readXml.getElementsByTagName("mergeCells/mergeCell", this.sheetFile);
         let clrScheme = this.styles["clrScheme"] as Element[];
-        let sheetView = this.readXml.getElementsByTagName("sheetViews/sheetView", sheetFile);
+        let sheetView = this.readXml.getElementsByTagName("sheetViews/sheetView", this.sheetFile);
         let showGridLines = "1", tabSelected="0", zoomScale = "100", activeCell = "A1";
         if(sheetView.length>0){
             let attrList = sheetView[0].attributeList;
@@ -48,7 +54,7 @@ export class LuckySheet extends LuckySheetBase {
             let selections = sheetView[0].getInnerElements("selection");
             if(selections!=null && selections.length>0){
                 activeCell = getXmlAttibute(selections[0].attributeList, "activeCell", "A1");
-                let range:IluckySheetSelection = getcellrange(activeCell, sheets, sheetId);
+                let range:IluckySheetSelection = getcellrange(activeCell, this.sheetList, sheetId);
                 this.luckysheet_select_save = [];
                 this.luckysheet_select_save.push(range);
             }
@@ -57,7 +63,7 @@ export class LuckySheet extends LuckySheetBase {
         this.status = tabSelected;
         this.zoomRatio = parseInt(zoomScale)/100;
 
-        let tabColors = this.readXml.getElementsByTagName("sheetPr/tabColor", sheetFile);
+        let tabColors = this.readXml.getElementsByTagName("sheetPr/tabColor", this.sheetFile);
         if(tabColors!=null && tabColors.length>0){
             let tabColor = tabColors[0], attrList = tabColor.attributeList;
             // if(attrList.rgb!=null){
@@ -66,17 +72,16 @@ export class LuckySheet extends LuckySheetBase {
             // }
         }
 
-        let sheetFormatPr = this.readXml.getElementsByTagName("sheetFormatPr", sheetFile);
-        let defaultColWidth = "8.38", defaultRowHeight="defaultRowHeight";
+        let sheetFormatPr = this.readXml.getElementsByTagName("sheetFormatPr", this.sheetFile);
+        let defaultColWidth, defaultRowHeight;
         if(sheetFormatPr.length>0){
             let attrList = sheetFormatPr[0].attributeList;
-            defaultColWidth = getXmlAttibute(attrList, "defaultColWidth", "8.38");
+            defaultColWidth = getXmlAttibute(attrList, "defaultColWidth", "9");
             defaultRowHeight = getXmlAttibute(attrList, "defaultRowHeight", "19");
         }
 
         this.defaultColWidth = getColumnWidthPixel(parseFloat(defaultColWidth));
         this.defaultRowHeight = getRowHeightPixel(parseFloat(defaultRowHeight));
-
 
 
         this.generateConfigColumnLenAndHidden();
@@ -153,7 +158,7 @@ export class LuckySheet extends LuckySheetBase {
                 if(ref==null){
                     continue;
                 }
-                let range = getcellrange(ref, sheets, sheetId);
+                let range = getcellrange(ref, this.sheetList, sheetId);
                 let mergeValue = new LuckySheetConfigMerge();
                 mergeValue.r = range.row[0];
                 mergeValue.c = range.column[0];
@@ -165,6 +170,128 @@ export class LuckySheet extends LuckySheetBase {
                 this.config.merge[range.row[0] + "_" + range.column[0]] = mergeValue;
             }
         }
+
+        let drawingFile = allFileOption.drawingFile, drawingRelsFile = allFileOption.drawingRelsFile;
+        if(drawingFile!=null && drawingRelsFile!=null){
+            let twoCellAnchors = this.readXml.getElementsByTagName("xdr:twoCellAnchor", drawingFile);
+
+            if(twoCellAnchors!=null && twoCellAnchors.length>0){
+                for(let i=0;i<twoCellAnchors.length;i++){
+                    let twoCellAnchor = twoCellAnchors[i];
+                    // let xdr_xfrms = twoCellAnchor.getInnerElements("a:xfrm");
+
+                    let xdrFroms = twoCellAnchor.getInnerElements("xdr:from"), xdrTos = twoCellAnchor.getInnerElements("xdr:to");
+
+                    let xdr_blipfills = twoCellAnchor.getInnerElements("a:blip");
+                    if(xdrFroms!=null && xdr_blipfills!=null && xdrFroms.length>0 && xdr_blipfills.length>0){
+                        let xdrFrom = xdrFroms[0], xdrTo = xdrTos[0],xdr_blipfill = xdr_blipfills[0];
+                        
+                        let rembed = getXmlAttibute(xdr_blipfill.attributeList, "r:embed", null);
+
+                        let imageObject = this.getBase64ByRid(rembed, drawingRelsFile);
+
+
+
+                        // let aoff = xdr_xfrm.getInnerElements("a:off"), aext = xdr_xfrm.getInnerElements("a:ext");
+
+                        
+
+                        // if(aoff!=null && aext!=null && aoff.length>0 && aext.length>0){
+                        //     let aoffAttribute = aoff[0].attributeList, aextAttribute = aext[0].attributeList;
+                        //     let x = getXmlAttibute(aoffAttribute, "x", null);
+                        //     let y = getXmlAttibute(aoffAttribute, "y", null);
+
+                        //     let cx = getXmlAttibute(aextAttribute, "cx", null);
+                        //     let cy = getXmlAttibute(aextAttribute, "cy", null);
+
+                        //     if(x!=null && y!=null && cx!=null && cy!=null && imageObject !=null){
+                        // let x_n = getPxByEMUs(parseInt(x), "c"),y_n = getPxByEMUs(parseInt(y));
+                        // let cx_n = getPxByEMUs(parseInt(cx), "c"),cy_n = getPxByEMUs(parseInt(cy));
+
+                        let x_n =0,y_n = 0;
+                        let cx_n = 0, cy_n = 0;
+
+                        imageObject.fromCol = this.getXdrValue(xdrFrom.getInnerElements("xdr:col"));
+                        imageObject.fromColOff = getPxByEMUs(this.getXdrValue(xdrFrom.getInnerElements("xdr:colOff")));
+                        imageObject.fromRow= this.getXdrValue(xdrFrom.getInnerElements("xdr:row"));
+                        imageObject.fromRowOff = getPxByEMUs(this.getXdrValue(xdrFrom.getInnerElements("xdr:rowOff")));
+
+                        imageObject.toCol = this.getXdrValue(xdrTo.getInnerElements("xdr:col"));
+                        imageObject.toColOff = getPxByEMUs(this.getXdrValue(xdrTo.getInnerElements("xdr:colOff")));
+                        imageObject.toRow = this.getXdrValue(xdrTo.getInnerElements("xdr:row"));
+                        imageObject.toRowOff = getPxByEMUs(this.getXdrValue(xdrTo.getInnerElements("xdr:rowOff")));
+
+                        imageObject.originWidth = cx_n;
+                        imageObject.originHeight = cy_n;
+                        imageObject.type = "1";
+                        imageObject.isFixedPos = false;
+                        imageObject.fixedLeft = 0;
+                        imageObject.fixedTop = 0;
+
+                        let imageBorder:IluckyImageBorder = {
+                            color: "#000",
+                            radius: 0,
+                            style: "solid",
+                            width: 0
+                        }
+                        imageObject.border = imageBorder;
+
+                        let imageCrop:IluckyImageCrop = {
+                            height: cy_n,
+                            offsetLeft: 0,
+                            offsetTop: 0,
+                            width: cx_n
+                        }
+                        imageObject.crop = imageCrop;
+
+                        let imageDefault:IluckyImageDefault = {
+                            height: cy_n,
+                            left: x_n,
+                            top: y_n,
+                            width: cx_n
+                        }
+                        imageObject.default = imageDefault;
+
+                        if(this.images==null){
+                            this.images = {};
+                        }
+                        this.images[generateRandomIndex("image")] = imageObject;
+                        //     }
+                        // }
+                    }
+                }
+            }
+            
+        } 
+    }
+
+    private getXdrValue(ele:Element[]):number{
+        if(ele==null || ele.length==0){
+            return null;
+        }
+
+        return parseInt(ele[0].value);
+    }
+
+    private getBase64ByRid(rid:string, drawingRelsFile:string){
+        let Relationships = this.readXml.getElementsByTagName("Relationships/Relationship", drawingRelsFile);
+
+        if(Relationships!=null && Relationships.length>0){
+            for(let i=0;i<Relationships.length;i++){
+                let Relationship = Relationships[i];
+                let attrList = Relationship.attributeList;
+                let Id = getXmlAttibute(attrList, "Id", null);
+                let src = getXmlAttibute(attrList, "Target", null);
+                if(Id == rid){
+                    src = src.replace(/\.\.\//g, "");
+                    src = "xl/" + src;
+                    let imgage = this.imageList.getImageByName(src);
+                    return imgage;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
