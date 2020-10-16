@@ -28,6 +28,9 @@ export class HandleZip{
                 if(suffix in {"png":1, "jpeg":1, "jpg":1, "gif":1,"bmp":1,"tif":1,"webp":1,}){
                     fileType = "base64";
                 }
+                else if(suffix=="emf"){
+                    fileType = "arraybuffer";
+                }
                 zipEntry.async(fileType).then(function (data:string) {
                     if(fileType=="base64"){
                         data = "data:image/"+ suffix +";base64," + data;
@@ -63,7 +66,10 @@ export class HandleZip{
                     if(suffix in {"png":1, "jpeg":1, "jpg":1, "gif":1,"bmp":1,"tif":1,"webp":1,}){
                         fileType = "base64";
                     }
-                    zipEntry.async(fileType).then(function (data:string) {
+                    else if(suffix=="emf"){
+                        fileType = "arraybuffer";
+                    }
+                    zipEntry.async(fileType).then(function (data:any) {
                         if(fileType=="base64"){
                             data = "data:image/"+ suffix +";base64," + data;
                         }

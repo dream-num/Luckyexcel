@@ -10,6 +10,7 @@ import { LuckySheet } from "./ToLuckySheet/LuckySheet";
 function demoHandler(){
     let upload = document.getElementById("Luckyexcel-demo-file");
     let selectADemo = document.getElementById("Luckyexcel-select-demo");
+    let downlodDemo = document.getElementById("Luckyexcel-downlod-file");
     if(upload){
         
         window.onload = () => {
@@ -47,9 +48,9 @@ function demoHandler(){
             });
 
             selectADemo.addEventListener("change", function(evt){
-                var obj:any = selectADemo; //定位id
-                var index = obj.selectedIndex; // 选中索引
-                var value = obj.options[index].value; // 选中值
+                var obj:any = selectADemo;
+                var index = obj.selectedIndex;
+                var value = obj.options[index].value;
                 var name = obj.options[index].innerHTML;
                 if(value==""){
                     return;
@@ -71,6 +72,28 @@ function demoHandler(){
                         userInfo:exportJson.info.name.creator
                     });
                 });
+            });
+
+            downlodDemo.addEventListener("click", function(evt){
+                var obj:any = selectADemo;
+                var index = obj.selectedIndex;
+                var value = obj.options[index].value;
+
+                if(value.length==0){
+                    alert("Please select a demo file");
+                    return;
+                }
+
+                var elemIF:any = document.getElementById("Lucky-download-frame");
+                if(elemIF==null){
+                    elemIF = document.createElement("iframe");
+                    elemIF.style.display = "none";
+                    elemIF.id = "Lucky-download-frame";
+                    document.body.appendChild(elemIF);
+                }
+                elemIF.src = value;
+
+                // elemIF.parentNode.removeChild(elemIF);
             });
         }
     }

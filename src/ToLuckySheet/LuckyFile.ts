@@ -175,15 +175,15 @@ export class LuckyFile extends LuckyFileBase {
         if(index<sets.length){
             return;
         }
-
+        
         let startIndex = sets.length, endIndex = index;
         let allGap = 0;
         if(startIndex>0){
             allGap = sets[startIndex-1];
         }
-        else{
-            sets.push(0);
-        }
+        // else{
+        //     sets.push(0);
+        // }
         for(let i=startIndex;i<=endIndex;i++){
             let gap = def, istring  = i.toString();
             if(istring in hidden){
@@ -239,22 +239,50 @@ export class LuckyFile extends LuckyFileBase {
             if(fromCol>=this.columnWidthSet.length){
                 this.extendArray(fromCol, this.columnWidthSet, defaultColWidth, colhidden, columnlen);
             }
-            x_n = this.columnWidthSet[fromCol] + fromColOff;
+            if(fromCol==0){
+                x_n = 0;
+            }
+            else{
+                x_n = this.columnWidthSet[fromCol-1];
+            }
+            x_n = x_n + fromColOff;
+
             if(fromRow>=this.rowHeightSet.length){
                 this.extendArray(fromRow, this.rowHeightSet, defaultRowHeight, rowhidden, rowlen);
             }
-            y_n = this.rowHeightSet[fromRow] + fromRowOff;
+            if(fromRow==0){
+                y_n = 0;
+            }
+            else{
+                y_n = this.rowHeightSet[fromRow-1];
+            }
+            y_n = y_n + fromRowOff;
 
 
             if(toCol>=this.columnWidthSet.length){
                 this.extendArray(toCol, this.columnWidthSet, defaultColWidth, colhidden, columnlen);
             }
-            cx_n = this.columnWidthSet[toCol] + toColOff - x_n;
+            if(toCol==0){
+                cx_n = 0;
+            }
+            else{
+                cx_n = this.columnWidthSet[toCol-1];
+            }
+            cx_n = cx_n + toColOff- x_n;
+
             if(toRow>=this.rowHeightSet.length){
                 this.extendArray(toRow, this.rowHeightSet, defaultRowHeight, rowhidden, rowlen);
             }
-            cy_n = this.rowHeightSet[toRow] + toRowOff - y_n;
+            if(toRow==0){
+                cy_n = 0;
+            }
+            else{
+                cy_n = this.rowHeightSet[toRow-1];
+            }
 
+            cy_n = cy_n + toRowOff - y_n;
+
+            console.log(defaultColWidth, colhidden , columnlen);
             console.log(fromCol, this.columnWidthSet[fromCol] , fromColOff);
             console.log(toCol, this.columnWidthSet[toCol] , toColOff, JSON.stringify(this.columnWidthSet));
 
