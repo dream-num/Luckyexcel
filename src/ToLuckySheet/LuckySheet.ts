@@ -76,7 +76,7 @@ export class LuckySheet extends LuckySheetBase {
         let defaultColWidth, defaultRowHeight;
         if(sheetFormatPr.length>0){
             let attrList = sheetFormatPr[0].attributeList;
-            defaultColWidth = getXmlAttibute(attrList, "defaultColWidth", "9");
+            defaultColWidth = getXmlAttibute(attrList, "defaultColWidth", "9.16");
             defaultRowHeight = getXmlAttibute(attrList, "defaultRowHeight", "19");
         }
 
