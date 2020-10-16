@@ -5,7 +5,7 @@ import {workBookFile, coreFile, appFile, stylesFile, sharedStringsFile,numFmtDef
 import { ReadXml,IStyleCollections,Element } from "./ReadXml";
 import {getXmlAttibute} from "../common/method";
 import { LuckyFileBase,LuckyFileInfo,LuckySheetBase,LuckySheetCelldataBase,LuckySheetCelldataValue,LuckySheetCellFormat } from "./LuckyBase";
-import {ImageList,Image} from "./LuckyImage";
+import {ImageList} from "./LuckyImage";
 
 export class LuckyFile extends LuckyFileBase {
 

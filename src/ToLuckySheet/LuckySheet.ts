@@ -178,7 +178,7 @@ export class LuckySheet extends LuckySheetBase {
             if(twoCellAnchors!=null && twoCellAnchors.length>0){
                 for(let i=0;i<twoCellAnchors.length;i++){
                     let twoCellAnchor = twoCellAnchors[i];
-                    // let xdr_xfrms = twoCellAnchor.getInnerElements("a:xfrm");
+                    let editAs = getXmlAttibute(twoCellAnchor.attributeList, "editAs", "twoCell");
 
                     let xdrFroms = twoCellAnchor.getInnerElements("xdr:from"), xdrTos = twoCellAnchor.getInnerElements("xdr:to");
 
@@ -223,7 +223,17 @@ export class LuckySheet extends LuckySheetBase {
 
                         imageObject.originWidth = cx_n;
                         imageObject.originHeight = cy_n;
-                        imageObject.type = "1";
+                        
+                        if(editAs=="absolute"){
+                            imageObject.type = "3";
+                        }
+                        else if(editAs=="oneCell"){
+                            imageObject.type = "2";
+                        }
+                        else{
+                            imageObject.type = "1";
+                        }
+
                         imageObject.isFixedPos = false;
                         imageObject.fixedLeft = 0;
                         imageObject.fixedTop = 0;
