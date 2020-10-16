@@ -11,6 +11,7 @@ function demoHandler(){
     let upload = document.getElementById("Luckyexcel-demo-file");
     let selectADemo = document.getElementById("Luckyexcel-select-demo");
     let downlodDemo = document.getElementById("Luckyexcel-downlod-file");
+    let mask = document.getElementById("lucky-mask-demo");
     if(upload){
         
         window.onload = () => {
@@ -55,6 +56,7 @@ function demoHandler(){
                 if(value==""){
                     return;
                 }
+                mask.style.display = "flex";
                 LuckyExcel.transformExcelToLuckyByUrl(value, name, function(exportJson:any, luckysheetfile:string){
                     
                     if(exportJson.sheets==null || exportJson.sheets.length==0){
@@ -62,6 +64,7 @@ function demoHandler(){
                         return;
                     }
                     console.log(exportJson, luckysheetfile);
+                    mask.style.display = "none";
                     window.luckysheet.destroy();
                     
                     window.luckysheet.create({
