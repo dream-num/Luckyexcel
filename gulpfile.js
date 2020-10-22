@@ -56,9 +56,32 @@ function bundle() {
         .pipe(source('luckyexcel.js'))
         .pipe(buffer())
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(uglify())
+        // .pipe(uglify()) //Development environment does not need to compress code
         .pipe(sourcemaps.write('./'))
         .pipe(dest("dist"));
+}
+
+
+function bundleBuild() {
+    return browserify({
+        basedir: '.',
+        entries: ['src/main.ts'],
+        cache: {},
+        packageCache: {}
+    })
+    .plugin(tsify)
+    .transform('babelify', {
+        presets: ['@babel/preset-env','@babel/preset-typescript'],
+        extensions: ['.ts']
+    })
+    .bundle()
+    .pipe(source('luckyexcel.js'))
+    .pipe(buffer())
+    // .pipe(sourcemaps.init({loadMaps: true})) //The production environment does not need source map file
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./'))
+    .pipe(dest("dist"));
+    
 }
 
 // 清除dist目录
@@ -78,7 +101,7 @@ function serve() {
 // 顺序执行
 const dev = series(clean, copyHtml, bundle, serve);
 
-const build = series(clean, copyHtml, bundle);
+const build = series(clean, copyHtml, bundleBuild);
 
 // 每次TypeScript文件改变时Browserify会执行bundle函数
 watchedBrowserify.on("update", series(bundle, reload));
