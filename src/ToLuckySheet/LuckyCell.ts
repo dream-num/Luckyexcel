@@ -46,6 +46,10 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
         let v = this.cell.getInnerElements("v");
         let f = this.cell.getInnerElements("f");
 
+        if(v==null){
+            v = this.cell.getInnerElements("t");
+        }
+
         let cellXfs = this.styles["cellXfs"] as Element[];
         let cellStyleXfs = this.styles["cellStyleXfs"] as Element[];
         let cellStyles = this.styles["cellStyles"] as Element[];
@@ -487,6 +491,10 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
         if(v!=null){
             let value =v[0].value;
+
+            if(/&#\d+;/.test(value)){
+                value = this.htmlDecode(value);
+            }
             
             if(t==ST_CellType["SharedString"]){
                 let siIndex = parseInt(v[0].value);
@@ -911,6 +919,12 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
         return ret;
     }
+
+    private htmlDecode (str:string):string {
+        return str.replace(/&#(x)?([^&]{1,5});?/g,function($,$1,$2) {
+            return String.fromCharCode(parseInt($2 , $1 ? 16:10));
+        });
+    };
 
 }
 
