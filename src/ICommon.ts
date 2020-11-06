@@ -15,8 +15,3 @@ export interface numTostring {
 export interface IattributeList {
     [index:string]:string
 }
-
-
-export interface IWorkBook{
-    
-}

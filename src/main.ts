@@ -122,7 +122,7 @@ export class LuckyExcel{
     }
 
     static transformExcelToLuckyByUrl(url:string, name:string, callBack?:(files:IuploadfileList, fs?:string)=>void){
-        let handleZip:HandleZip = new HandleZip(null);
+        let handleZip:HandleZip = new HandleZip();
         handleZip.unzipFileByUrl(url, function(files:IuploadfileList){
             let luckyFile = new LuckyFile(files, name);
             let luckysheetfile = luckyFile.Parse();

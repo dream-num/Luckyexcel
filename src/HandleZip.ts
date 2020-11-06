@@ -1,17 +1,15 @@
 import JSZip from "jszip";
-import {IuploadfileList, IWorkBook} from "./ICommon";
+import {IuploadfileList} from "./ICommon";
 import {getBinaryContent} from "./common/method"
 
 
 export class HandleZip{
     uploadFile:File; 
-    workBook:IWorkBook; 
-    constructor(file:File | IWorkBook | undefined){
+    workBook:JSZip; 
+    
+    constructor(file:File | void){
         if(file instanceof File){
             this.uploadFile = file;
-        }
-        else {
-            this.workBook = file;
         }
     }
 
@@ -89,7 +87,17 @@ export class HandleZip{
         
     }
 
-    zipFile(workBook:IWorkBook):void { 
-        
+    newZipFile():void { 
+        var zip = new JSZip();
+        this.workBook =  zip;
+    }
+
+    //title:"nested/hello.txt", content:"Hello Worldasdfasfasdfasfasfasfasfasdfas"
+    addToZipFile(title:string,content:string):void { 
+        if(this.workBook==null){
+            var zip = new JSZip();
+            this.workBook =  zip;
+        }
+        this.workBook.file(title, content);
     }
 }
