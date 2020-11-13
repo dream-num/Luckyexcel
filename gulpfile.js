@@ -28,10 +28,24 @@ const paths = {
     pages: ['src/*.html',"assets/**"]
 };
 
-// 复制html
+// Copy html
 function copyHtml(){
     return src(paths.pages)
         .pipe(dest("dist"));
+}
+
+// Refresh browser
+function reloadBrowser(done) {
+    reload();
+
+    done();
+}
+
+// Monitoring static file changes
+function watcher(done) {
+    // watch static
+    watch(paths.pages,{ delay: 500 }, series(copyHtml, reloadBrowser));
+    done();
 }
 
 // 监听文件改变
@@ -99,7 +113,7 @@ function serve() {
 }
 
 // 顺序执行
-const dev = series(clean, copyHtml, bundle, serve);
+const dev = series(clean, copyHtml, bundle, watcher, serve);
 
 const build = series(clean, copyHtml, bundleBuild);
 
