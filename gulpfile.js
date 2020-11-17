@@ -24,9 +24,44 @@ const del = require('delete');
 const browserSync = require('browser-sync').create();
 const reload = browserSync.reload;
 
+// rollup packaging, processing es6 modules
+const { rollup } = require('rollup');
+// rollup typescript
+const typescript = require('rollup-plugin-typescript2');
+// rollup looks for node_modules module
+// const { nodeResolve } = require('@rollup/plugin-node-resolve');
+// rollup converts commonjs module to es6 module
+// const commonjs = require('@rollup/plugin-commonjs');
+// rollup code compression
+// const terser = require('rollup-plugin-terser').terser;
+// rollup babel plugin, support the latest ES grammar
+// const babel = require('@rollup/plugin-babel').default;
+
+const pkg = require('./package.json');
+
+
 const paths = {
     pages: ['src/*.html',"assets/**"]
 };
+
+// babel config
+// const babelConfig = {
+//     babelHelpers: 'bundled',
+//     exclude: 'node_modules/**', // Only compile our source code
+//     plugins: [
+//     ],
+//     presets: [
+//         ['@babel/preset-env', {
+//             useBuiltIns: 'usage',
+//             corejs: 3,
+//             targets: {
+//                 chrome: 58,
+//                 ie: 11
+//             }
+//         }],
+//         '@babel/preset-typescript'
+//     ]
+// };
 
 // Copy html
 function copyHtml(){
@@ -53,13 +88,14 @@ const watchedBrowserify = watchify(browserify({
     basedir: '.',
     debug: true,
     entries: [
-        'src/main.ts'
+        'src/main.umd.ts'
     ],
     cache: {},
-    packageCache: {}
+    packageCache: {},
+    standalone:'LuckyExcel'
 }).plugin(tsify));
 
-// 打包成js
+// 开发模式，打包成es5，方便在浏览器里直接引用调试
 function bundle() {
     return watchedBrowserify
         .transform('babelify', {
@@ -67,7 +103,7 @@ function bundle() {
             extensions: ['.ts']
         })
         .bundle()
-        .pipe(source('luckyexcel.js'))
+        .pipe(source('luckyexcel.umd.js'))
         .pipe(buffer())
         .pipe(sourcemaps.init({loadMaps: true}))
         // .pipe(uglify()) //Development environment does not need to compress code
@@ -75,13 +111,55 @@ function bundle() {
         .pipe(dest("dist"));
 }
 
+// 生产模式，打包成ES模块和Commonjs模块
+async function compile() {
+    
+    const bundle = await rollup({
+        input: 'src/main.esm.ts',
+        plugins: [
+            // nodeResolve(), // tells Rollup how to find date-fns in node_modules
+            // commonjs(), // converts date-fns to ES modules
+            typescript({
+                tsconfigOverride: { 
+                    compilerOptions : { module: "ESNext" } 
+                }
+            }),
+            // terser(), // minify, but only in production
+            // babel(babelConfig)
+        ],
+    });
 
-function bundleBuild() {
+    bundle.write({
+        file: pkg.module,
+        format: 'esm',
+        name: 'LuckyExcel',
+        inlineDynamicImports:true,
+        // sourcemap: true
+    })
+    bundle.write({
+        file: pkg.main,
+        format: 'cjs',
+        name: 'LuckyExcel',
+        inlineDynamicImports:true,
+        // sourcemap: true
+    })
+    // bundle.write({
+    //     file: pkg.browser,
+    //     format: 'umd',
+    //     name: 'LuckyExcel',
+    //     inlineDynamicImports:true,
+    //     // sourcemap: true
+    // })
+}
+
+// 生产模式，打包成UMD模块
+function bundleUMD() {
     return browserify({
         basedir: '.',
-        entries: ['src/main.ts'],
+        entries: ['src/main.umd.ts'],
         cache: {},
-        packageCache: {}
+        packageCache: {},
+        standalone:'LuckyExcel'
     })
     .plugin(tsify)
     .transform('babelify', {
@@ -89,14 +167,15 @@ function bundleBuild() {
         extensions: ['.ts']
     })
     .bundle()
-    .pipe(source('luckyexcel.js'))
+    .pipe(source('luckyexcel.umd.js'))
     .pipe(buffer())
     // .pipe(sourcemaps.init({loadMaps: true})) //The production environment does not need source map file
-    .pipe(uglify())
+    // .pipe(uglify())
     .pipe(sourcemaps.write('./'))
     .pipe(dest("dist"));
     
 }
+  
 
 // 清除dist目录
 function clean() {
@@ -115,7 +194,7 @@ function serve() {
 // 顺序执行
 const dev = series(clean, copyHtml, bundle, watcher, serve);
 
-const build = series(clean, copyHtml, bundleBuild);
+const build = series(clean, parallel(copyHtml, compile, bundleUMD));
 
 // 每次TypeScript文件改变时Browserify会执行bundle函数
 watchedBrowserify.on("update", series(bundle, reload));

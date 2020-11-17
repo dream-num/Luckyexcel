@@ -7,10 +7,11 @@ export class HandleZip{
     uploadFile:File; 
     workBook:JSZip; 
     
-    constructor(file:File | void){
-        if(file instanceof File){
+    constructor(file?:File){
+        // Support nodejs fs to read files
+        // if(file instanceof File){
             this.uploadFile = file;
-        }
+        // }
     }
 
     unzipFile(successFunc:(file:IuploadfileList)=>void, errorFunc:(err:Error)=>void):void { 

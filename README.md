@@ -25,60 +25,79 @@ The goal is to support all features supported by Luckysheet
 - Annotation
 - Excel export
 
-## Requirements
+## Usage
+
+### CDN
+```html
+<script src="https://cdn.jsdelivr.net/npm/luckyexcel/dist/luckyexcel.umd.js"></script>
+<script>
+    // Make sure to get the xlsx file first, and then use the global method window.LuckyExcel to convert
+    LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
+        
+        // After obtaining the converted table data, use luckysheet to initialize or update the existing luckysheet workbook
+        // Note: Luckysheet needs to introduce a dependency package and initialize the table container before it can be used
+        luckysheet.create({
+            container: 'luckysheet', // luckysheet is the container id
+            data:exportJson.sheets,
+            title:exportJson.info.name,
+            userInfo:exportJson.info.name.creator
+        });
+    });
+</script>
+```
+### ES and Node.js
+
+#### Installation
+```shell
+npm install luckyexcel
+```
+
+#### ES import
+```js
+import LuckyExcel from './luckyexcel'
+
+// After getting the xlsx file
+LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
+    //Get the worksheet data after conversion
+});
+```
+
+#### Node.js import
+```js
+var fs = require("fs");
+var LuckyExcel = require('luckyexcel');
+
+// Read a xlsx file
+fs.readFile("House cleaning checklist.xlsx", function(err, data) {
+    if (err) throw err;
+
+    LuckyExcel.transformExcelToLucky(data, function(exportJson, luckysheetfile){
+        // Get the worksheet data after conversion
+    });
+
+});
+```
+
+## Development
+
+### Requirements
 [Node.js](https://nodejs.org/en/) Version >= 6 
 
-## Installation
+### Installation
 ```
 npm install -g gulp-cli
 npm install
 ```
-
-## Development
-Development
+### Development
 ```
 npm run dev
 ```
-Package
+### Package
 ```
 npm run build
 ```
 
 A third-party plug-in is used in the project: [JSZip](https://github.com/Stuk/jszip), thanks!
-
-## Usage (under improvement)
-
-#### Step 1
-After `gulp build`, copy bundle.js in the `dist` folder to the project directory, and bundle.js is the core code of the project
-
-#### Step 2
-
-Import bundle.js, specify a file upload component on the interface, write a monitoring method similar to the following, call `LuckyExcel.transformExcelToLucky`, and then get the converted JSON data in the callback. This JSON data is in a format that Luckysheet can recognize. Use Luckysheet to initialize.
-```js
-function demoHandler(){
-    let upload = document.getElementById("Luckyexcel-demo-file");
-    if(upload){
-        
-        window.onload = () => {
-            
-            upload.addEventListener("change", function(evt){
-                var files:FileList = (evt.target as any).files;
-                LuckyExcel.transformExcelToLucky(files[0], function(exportJson:any){
-
-                    window.luckysheet.destroy();
-                    
-                    window.luckysheet.create({
-                        container:'luckysheet', //luckysheet is the container id
-                        data:exportJson.sheets,
-                        title:exportJson.info.name,
-                        userInfo:exportJson.info.name.creator
-                    });
-                });
-            });
-        }
-    }
-}
-```
 
 ## Communication
 

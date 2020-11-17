@@ -1,20 +1,30 @@
 {
-  "name": "gulp-ts",
+  "name": "luckyexcel",
   "version": "1.0.0",
-  "description": "",
-  "main": "./dist/main.js",
+  "description": "An excel import and export library adapted to Luckysheet",
+  "main": "dist/luckyexcel.cjs.js",
+  "module": "dist/luckyexcel.esm.js",
+  "browser": "dist/luckyexcel.umd.js",
   "scripts": {
     "build": "gulp build",
-    "dev": "gulp dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "gulp dev"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "Luckysheet",
+    "excel"
+  ],
+  "author": "msoffice2@126.com",
+  "homepage": "https://github.com/mengshukeji/Luckyexcel",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mengshukeji/Luckyexcel.git"
+  },
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.10.5",
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",
+    "@rollup/plugin-typescript": "^6.1.0",
     "@types/node": "^14.14.2",
     "babelify": "^10.0.0",
     "browser-sync": "^2.26.10",
@@ -26,7 +36,10 @@
     "gulp-typescript": "^6.0.0-alpha.1",
     "gulp-uglify": "^3.0.2",
     "gulp-util": "^3.0.8",
+    "rollup": "^2.33.1",
+    "rollup-plugin-typescript2": "^0.29.0",
     "tsify": "^4.0.2",
+    "tslib": "^2.0.3",
     "typescript": "^3.9.7",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",

@@ -26,60 +26,79 @@ Luckyexcel，是一个适配 [Luckysheet](https://github.com/mengshukeji/Luckysh
 - 批注
 - excel导出
 
-## 环境
+## 用法
+
+### CDN
+```html
+<script src="https://cdn.jsdelivr.net/npm/luckyexcel/dist/luckyexcel.umd.js"></script>
+<script>
+    // 先确保获取到了xlsx文件file，再使用全局方法window.LuckyExcel转化
+    LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
+        
+        // 获得转化后的表格数据后，使用luckysheet初始化，或者更新已有的luckysheet工作簿
+        // 注：luckysheet需要引入依赖包和初始化表格容器才可以使用
+        luckysheet.create({
+            container: 'luckysheet', // luckysheet is the container id
+            data:exportJson.sheets,
+            title:exportJson.info.name,
+            userInfo:exportJson.info.name.creator
+        });
+    });
+</script>
+```
+### ES 和 Node.js
+
+#### 安装
+```shell
+npm install luckyexcel
+```
+
+#### ES导入
+```js
+import LuckyExcel from './luckyexcel'
+
+// 得到xlsx文件后
+LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
+    // 转换后获取工作表数据
+});
+```
+
+#### Node.js导入
+```js
+var fs = require("fs");
+var LuckyExcel = require('luckyexcel');
+
+// 读取一个xlsx文件
+fs.readFile("House cleaning checklist.xlsx", function(err, data) {
+    if (err) throw err;
+
+    LuckyExcel.transformExcelToLucky(data, function(exportJson, luckysheetfile){
+        // 转换后获取工作表数据
+    });
+
+});
+```
+
+## 开发
+
+### 环境
 [Node.js](https://nodejs.org/en/) Version >= 6 
 
-## 安装
+### 安装
 ```
 npm install -g gulp-cli
 npm install
 ```
-
-## 开发
-开发
+### 开发
 ```
 npm run dev
 ```
-打包
+### 打包
 ```
 npm run build
 ```
 
 项目中使用了第三方插件：[JSZip](https://github.com/Stuk/jszip)，感谢！
-
-## 用法（改进中）
-
-#### 第一步
-`gulp build`后`dist`文件夹下的bundle.js复制到项目目录，bundle.js即为项目核心代码
-
-#### 第二步
-
-导入bundle.js,界面上指定一个文件上传组件，编写类似如下的监听方法，调用`LuckyExcel.transformExcelToLucky`，然后在回调中获取到转换后的JSON数据，此JSON数据即是Luckysheet可识别的格式，使用Luckysheet初始化即可。
-```js
-function demoHandler(){
-    let upload = document.getElementById("Luckyexcel-demo-file");
-    if(upload){
-        
-        window.onload = () => {
-            
-            upload.addEventListener("change", function(evt){
-                var files:FileList = (evt.target as any).files;
-                LuckyExcel.transformExcelToLucky(files[0], function(exportJson:any){
-
-                    window.luckysheet.destroy();
-                    
-                    window.luckysheet.create({
-                        container: 'luckysheet', //luckysheet is the container id
-                        data:exportJson.sheets,
-                        title:exportJson.info.name,
-                        userInfo:exportJson.info.name.creator
-                    });
-                });
-            });
-        }
-    }
-}
-```
 
 ## 交流
 - 任何疑问或者建议，欢迎提交[Issues](https://github.com/mengshukeji/Luckyexcel/issues/)
