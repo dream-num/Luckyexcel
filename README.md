@@ -45,6 +45,8 @@ The goal is to support all features supported by Luckysheet
     });
 </script>
 ```
+> Case [Demo index.html](./src/index.html) shows the detailed usage
+
 ### ES and Node.js
 
 #### Installation

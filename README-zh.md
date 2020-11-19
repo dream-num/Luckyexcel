@@ -46,6 +46,8 @@ Luckyexcel，是一个适配 [Luckysheet](https://github.com/mengshukeji/Luckysh
     });
 </script>
 ```
+> 案例 [Demo index.html](./src/index.html)展示了详细的用法
+
 ### ES 和 Node.js
 
 #### 安装
