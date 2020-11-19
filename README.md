@@ -54,13 +54,14 @@ npm install luckyexcel
 
 #### ES import
 ```js
-import LuckyExcel from './luckyexcel'
+import LuckyExcel from 'luckyexcel'
 
 // After getting the xlsx file
 LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
     //Get the worksheet data after conversion
 });
 ```
+> Case [luckysheet-vue](https://github.com/mengshukeji/luckysheet-vue)
 
 #### Node.js import
 ```js
@@ -77,6 +78,7 @@ fs.readFile("House cleaning checklist.xlsx", function(err, data) {
 
 });
 ```
+> Case [Luckyexcel-node](https://github.com/mengshukeji/Luckyexcel-node)
 
 ## Development
 

@@ -55,13 +55,14 @@ npm install luckyexcel
 
 #### ES导入
 ```js
-import LuckyExcel from './luckyexcel'
+import LuckyExcel from 'luckyexcel'
 
 // 得到xlsx文件后
 LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
     // 转换后获取工作表数据
 });
 ```
+> 案例 [luckysheet-vue](https://github.com/mengshukeji/luckysheet-vue)
 
 #### Node.js导入
 ```js
@@ -78,6 +79,8 @@ fs.readFile("House cleaning checklist.xlsx", function(err, data) {
 
 });
 ```
+> 案例 [Luckyexcel-node](https://github.com/mengshukeji/Luckyexcel-node)
+
 
 ## 开发
 
