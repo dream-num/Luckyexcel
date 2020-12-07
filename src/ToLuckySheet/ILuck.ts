@@ -327,3 +327,17 @@ export interface IluckyImageDefault {
 export interface IluckyImages {
     [index:string]:IluckyImage
 }
+
+
+export interface IcellOtherInfo{
+    [index:string]:IformulaList
+}
+
+export interface IformulaList{
+    [index:string]:IformulaListItem
+}
+
+export interface IformulaListItem{
+    r:number,
+    c:number
+}

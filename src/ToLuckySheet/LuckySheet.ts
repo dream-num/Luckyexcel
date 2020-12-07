@@ -1,4 +1,4 @@
-﻿import { IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IluckysheetFrozen} from "./ILuck";
+﻿import { IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IcellOtherInfo,IformulaList,IformulaListItem} from "./ILuck";
 import {LuckySheetCelldata} from "./LuckyCell";
 import { IattributeList } from "../ICommon";
 import {getXmlAttibute, getColumnWidthPixel, fromulaRef,getRowHeightPixel,getcellrange,generateRandomIndex,getPxByEMUs} from "../common/method";
@@ -85,7 +85,7 @@ export class LuckySheet extends LuckySheetBase {
 
 
         this.generateConfigColumnLenAndHidden();
-        this.generateConfigRowLenAndHiddenAddCell();
+        let cellOtherInfo:IcellOtherInfo =  this.generateConfigRowLenAndHiddenAddCell();
 
         if(this.formulaRefList!=null){
             for(let key in this.formulaRefList){
@@ -135,6 +135,8 @@ export class LuckySheet extends LuckySheetBase {
         if(this.calcChain==null){
             this.calcChain = [];
         }
+
+        let formulaListExist:IformulaList={};
         for(let c=0;c<this.calcChainEles.length;c++){
             let calcChainEle = this.calcChainEles[c], attrList = calcChainEle.attributeList;
             if(attrList.i!=sheetId){
@@ -149,6 +151,19 @@ export class LuckySheet extends LuckySheetBase {
             chain.c = range.column[0];
             chain.index = this.index;
             this.calcChain.push(chain);
+            formulaListExist["r"+r+"c"+c] = null;
+        }
+
+        //There may be formulas that do not appear in calcChain
+        for(let key in cellOtherInfo.formulaList){
+            if(!(key in formulaListExist)){
+                let formulaListItem = cellOtherInfo.formulaList[key];
+                let chain = new LuckysheetCalcChain();
+                chain.r = formulaListItem.r;
+                chain.c = formulaListItem.c;
+                chain.index = this.index;
+                this.calcChain.push(chain);
+            }
         }
 
         if(this.mergeCells!=null){
@@ -357,8 +372,11 @@ export class LuckySheet extends LuckySheetBase {
     /**
     * @desc This will convert cols/col to luckysheet config of column'width
     */
-   private generateConfigRowLenAndHiddenAddCell(){
+   private generateConfigRowLenAndHiddenAddCell():IcellOtherInfo{
         let rows = this.readXml.getElementsByTagName("sheetData/row", this.sheetFile);
+        let cellOtherInfo:IcellOtherInfo = {};
+        let formulaList:IformulaList = {};
+        cellOtherInfo.formulaList = formulaList;
         for(let i=0;i<rows.length;i++){
             let row = rows[i], attrList = row.attributeList;
             let rowNo = getXmlAttibute(attrList, "r", null);
@@ -500,11 +518,22 @@ export class LuckySheet extends LuckySheetBase {
                         // console.log(refValue, this.formulaRefList);
                     }
 
+                    //There may be formulas that do not appear in calcChain
+                    if(cellValue.v!=null && (cellValue.v as IluckySheetCelldataValue).f!=null){
+                        let formulaCell:IformulaListItem = {
+                            r:cellValue.r,
+                            c:cellValue.c
+                        }
+                        cellOtherInfo.formulaList["r"+cellValue.r+"c"+cellValue.c] = formulaCell;
+                    }
+
                     this.celldata.push(cellValue);
                 }
                 
             }
         }
+
+        return cellOtherInfo;
     }
 
     // private getBorderInfo(borders:Element[]):LuckySheetborderInfoCellValueStyle{
