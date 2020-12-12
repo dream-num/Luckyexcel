@@ -41,7 +41,7 @@ export class LuckyFile extends LuckyFileBase {
         this.imageList = new ImageList(files);
 
         let numfmts =  this.readXml.getElementsByTagName("numFmt/numFmt", stylesFile);
-        let numFmtDefaultC = numFmtDefault;
+        let numFmtDefaultC = JSON.parse(JSON.stringify(numFmtDefault));
         for(let i=0;i<numfmts.length;i++){
             let attrList = numfmts[i].attributeList;
             let numfmtid = getXmlAttibute(attrList, "numFmtId", "49");
