@@ -71,7 +71,11 @@ export class LuckyFile extends LuckyFileBase {
             let rel = workbookRelList[i], attrList = rel.attributeList;
             let id = attrList["Id"], target = attrList["Target"];
             if(regex.test(target)){
-                sheetNames[id] = "xl/" + target;
+                if(target.startsWith('/xl')){
+                    sheetNames[id] =   target.substr(1);
+                }else{
+                    sheetNames[id] =   "xl/" + target;
+                }
             }
            
         }
@@ -328,7 +332,6 @@ export class LuckyFile extends LuckyFileBase {
 
         return null;
     }
-    
     private getDrawingRelsFile(drawingFile:string):string{
         let drawingRelsPath = "xl/drawings/_rels/";
         let drawingFileArr = drawingFile.split("/");
