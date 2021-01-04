@@ -71,25 +71,12 @@
                     loadUrl: location.origin + "/luckysheet/api/load",
                     loadSheetUrl: location.origin + "/luckysheet/api/loadsheet"
                 }
-            }else{
+			}else{
                 // http://localhost:3000/ 
                 options = {
                     container: 'luckysheet',
 					lang: lang,
 					forceCalculation:false,
-					// userInfo:'<i style="font-size:16px;color:#ff6a00;" class="fa fa-taxi" aria-hidden="true"></i> Lucky',
-					// userInfo:'Lucky',
-
-					// userInfo:false,
-					// userInfo:true,
-
-					// userInfo:undefined,
-
-					userInfo: {
-						// str:'<i style="font-size:16px;color:#ff6a00;" class="fa fa-taxi" aria-hidden="true"></i> rabbit',
-						userImage:'https://cdn.jsdelivr.net/npm/luckyresources@1.0.3/assets/img/logo/logo.png',
-						userName:'lucky'
-					},
 					plugins: ['chart'],
 					fontList:[
 						{
@@ -177,6 +164,10 @@
 						},
 						workbookCreateAfter:function(json){
 							// console.info(json)
+						},
+						rangePasteBefore:function(range,data){
+							// console.info('rangePasteBefore',range,data)
+							// return false; //Can intercept paste
 						},
 						
 
