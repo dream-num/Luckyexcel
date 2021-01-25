@@ -2,7 +2,11 @@
 
 export interface IuploadfileList { 
     [index:string]:string 
-} 
+}
+
+export interface IdownloadfileList { 
+    [index:string]:string 
+}
 
 export interface stringToNum {
     [index:string] : number

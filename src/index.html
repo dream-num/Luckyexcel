@@ -22,9 +22,12 @@
     </head>
     <body>
         <div id="lucky-mask-demo" style="position: absolute;z-index: 1000000;left: 0px;top: 0px;bottom: 0px;right: 0px; background: rgba(255, 255, 255, 0.8); text-align: center;font-size: 40px;align-items:center;justify-content: center;display: none;">Downloading</div>
-        <p style="text-align:center;"> <input style="font-size:16px;" type="file" id="Luckyexcel-demo-file" name="Luckyexcel-demo-file" change="demoHandler" /> Or Load remote xlsx file: <select style="height: 27px;top: -2px;position: relative;" id="Luckyexcel-select-demo"> <option value="">select a demo</option> <option value="https://minio.cnbabylon.com/public/luckysheet/money-manager-2.xlsx">Money Manager.xlsx</option> <option value="https://minio.cnbabylon.com/public/luckysheet/Activity%20costs%20tracker.xlsx">Activity costs tracker.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/House%20cleaning%20checklist.xlsx">House cleaning checklist.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Student%20assignment%20planner.xlsx">Student assignment planner.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Credit%20card%20tracker.xlsx">Credit card tracker.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Blue%20timesheet.xlsx">Blue timesheet.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Student%20calendar%20%28Mon%29.xlsx">Student calendar (Mon).xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Blue%20mileage%20and%20expense%20report.xlsx">Blue mileage and expense report.xlsx</option> </select> <a href="javascript:void(0)" id="Luckyexcel-downlod-file">Download source xlsx file</a></p>
+        <p style="text-align:center;"> <input style="font-size:16px;" type="file" id="Luckyexcel-demo-file" name="Luckyexcel-demo-file" change="demoHandler" /> Or Load remote xlsx file: <select style="height: 27px;top: -2px;position: relative;" id="Luckyexcel-select-demo"> <option value="">select a demo</option> <option value="https://minio.cnbabylon.com/public/luckysheet/money-manager-2.xlsx">Money Manager.xlsx</option> <option value="https://minio.cnbabylon.com/public/luckysheet/Activity%20costs%20tracker.xlsx">Activity costs tracker.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/House%20cleaning%20checklist.xlsx">House cleaning checklist.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Student%20assignment%20planner.xlsx">Student assignment planner.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Credit%20card%20tracker.xlsx">Credit card tracker.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Blue%20timesheet.xlsx">Blue timesheet.xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Student%20calendar%20%28Mon%29.xlsx">Student calendar (Mon).xlsx</option><option value="https://minio.cnbabylon.com/public/luckysheet/Blue%20mileage%20and%20expense%20report.xlsx">Blue mileage and expense report.xlsx</option> </select> <a href="javascript:void(0)" id="Luckyexcel-downlod-file">Download source xlsx file</a>
+        <button id="Luckyexcel-save" style="margin-left:10px;">SAVE</button>
+        </p>
         <div id="luckysheet" style="margin:0px;padding:0px;position:absolute;width:100%;left: 0px;top: 50px;bottom: 0px;outline: none;"></div>
         <script src="luckyexcel.umd.js"></script>
+        <script src="https://cdn.bootcdn.net/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
         <!-- <script type="module">
             import l from './luckyexcel.js';
             console.info('=====',l)
@@ -42,6 +45,7 @@
                 let selectADemo = document.getElementById("Luckyexcel-select-demo");
                 let downlodDemo = document.getElementById("Luckyexcel-downlod-file");
                 let mask = document.getElementById("lucky-mask-demo");
+                let save = document.getElementById("Luckyexcel-save");
                 if(upload){
                     
                     window.onload = () => {
@@ -126,6 +130,15 @@
                             }
                             elemIF.src = value;
                         });
+
+                        // Luckyexcel export 
+                        save.addEventListener('click',function(evt){
+                            var luckyJson = luckysheet.toJson();
+                            LuckyExcel.transformLuckyToExcel(luckyJson,function(content,filename){
+                                // Use FileSaver.js to download XLSX file
+                                saveAs(content,filename);
+                            })
+                        })
                     }
                 }
             }

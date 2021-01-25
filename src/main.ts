@@ -3,7 +3,10 @@ import { LuckyFile } from "./ToLuckySheet/LuckyFile";
 
 import {HandleZip} from './HandleZip';
 
-import {IuploadfileList} from "./ICommon";
+import {IuploadfileList,IdownloadfileList} from "./ICommon";
+import {ILuckyFile} from './ToLuckySheet/ILuck'
+import { ZipFile } from "./ZipFile";
+import { ExcelFile } from "./toExcel/ExcelFile";
 
 // //demo
 // function demoHandler(){
@@ -135,7 +138,33 @@ export class LuckyExcel{
         });
     }
 
-    static transformLuckyToExcel(LuckyFile: any, callBack?: (files: string) => void) {
-        
+    /**
+     * Transform Lucksheet json to XLSX file
+     * @param LuckyJson :Luckysheet options json
+     * @param callBack: Get Blob content
+     */
+    static transformLuckyToExcel(luckyJson: object, callBack?: (files: string) => void) {
+
+        // Get filename and all sheets data
+        const luckyFile:ILuckyFile = {
+            info:{
+                name: luckyJson.title
+            },
+            sheets:luckyJson.data
+        }
+
+        // JSON to XML string
+        let excelFile = new ExcelFile(luckyFile);
+        let fileList:IdownloadfileList = excelFile.Parse();
+
+        // XML string to file
+        let zipFile:ZipFile = new ZipFile(fileList);
+        zipFile.zipFiles(function(content:Blob){
+            callBack(content, luckyJson.title)
+        },
+        function(err:Error){
+            console.error(err);
+        })
+
     }
 }
