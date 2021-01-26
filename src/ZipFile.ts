@@ -24,11 +24,11 @@ export class ZipFile extends HandleZip{
 
         const files = this.downloadFile;
         for(let filename in files){
-            // todo:paths parse
-            this.addToZipFile(filename,files[filename])
+            // todo:paths parse,this just demo
+            this.addToZipFile("file"+filename,JSON.stringify(files[filename]))
         }
 
-        this.workBook.generateAsync({ type: "blob",mimeType:"application/vnd.ms-excel" }).then(function (content:Blob) { 
+        this.workBook.generateAsync({ type: "blob",mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }).then(function (content:Blob) { 
              successFunc(content)
         },function(err:Error){
             errorFunc(err);

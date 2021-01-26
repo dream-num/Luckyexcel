@@ -3,14 +3,19 @@ export interface ILuckyFile{
     sheets:IluckySheet[],//Sheets, include all sheet data
 }
 
+export interface ILuckyJson{
+    title:string, //Workbook name
+    data:IluckySheet[],//Sheets, include all sheet data
+}
+
 export interface ILuckyFileInfo{
     name:string,// File name
-    creator:string,//Create user
-    lastmodifiedby:string,//Edit user
-    createdTime:string,
-    modifiedTime:string,
-    company:string,
-    appversion:string,//Excel version, Is it necessary?
+    creator?:string,//Create user
+    lastmodifiedby?:string,//Edit user
+    createdTime?:string,
+    modifiedTime?:string,
+    company?:string,
+    appversion?:string,//Excel version, Is it necessary?
 }
 
 export interface IluckySheet{

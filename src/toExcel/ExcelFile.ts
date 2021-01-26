@@ -1,17 +1,21 @@
 
 
 import { LuckyFileBase } from "../ToLuckySheet/LuckyBase";
-import { ILuckyFile } from "../ToLuckySheet/ILuck";
+import { ILuckyFile, ILuckyFileInfo, IluckySheet } from "../ToLuckySheet/ILuck";
 import { IdownloadfileList } from "../ICommon";
 
-export class ExcelFile extends LuckyFileBase{
+export class ExcelFile implements ILuckyFile{
+    
+    info:ILuckyFileInfo;
+    sheets:IluckySheet[];
+    
     constructor(luckyFile:ILuckyFile){
-        super();
-        this.info.name = luckyFile.info.name;
+        // super();
+        this.info = luckyFile.info;
         this.sheets = luckyFile.sheets;
     }
 
-    Parse():void{
+    Parse():any{
 
         // todo: transform json to xml string
         
@@ -21,6 +25,8 @@ export class ExcelFile extends LuckyFileBase{
         // workbookRels toWorkBookRels()
         // contentTypesFile toContentType()
         // worksheetFilePath toWorkSheets()
+
+        return this.sheets;
 
         
     }

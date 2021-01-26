@@ -4,7 +4,7 @@ import { LuckyFile } from "./ToLuckySheet/LuckyFile";
 import {HandleZip} from './HandleZip';
 
 import {IuploadfileList,IdownloadfileList} from "./ICommon";
-import {ILuckyFile} from './ToLuckySheet/ILuck'
+import {ILuckyFile,ILuckyJson} from './ToLuckySheet/ILuck'
 import { ZipFile } from "./ZipFile";
 import { ExcelFile } from "./toExcel/ExcelFile";
 
@@ -143,7 +143,7 @@ export class LuckyExcel{
      * @param LuckyJson :Luckysheet options json
      * @param callBack: Get Blob content
      */
-    static transformLuckyToExcel(luckyJson: object, callBack?: (files: string) => void) {
+    static transformLuckyToExcel(luckyJson: ILuckyJson, callBack?: (content: Blob, title: string) => void) {
 
         // Get filename and all sheets data
         const luckyFile:ILuckyFile = {
@@ -162,6 +162,7 @@ export class LuckyExcel{
         zipFile.zipFiles(function(content:Blob){
             callBack(content, luckyJson.title)
         },
+        
         function(err:Error){
             console.error(err);
         })
