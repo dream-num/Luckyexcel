@@ -71,7 +71,7 @@ export class LuckyFile extends LuckyFileBase {
             let rel = workbookRelList[i], attrList = rel.attributeList;
             let id = attrList["Id"], target = attrList["Target"];
             if(regex.test(target)){
-                if(target.startsWith('/xl')){
+                if(target.indexOf('/xl') === 0){
                     sheetNames[id] =   target.substr(1);
                 }else{
                     sheetNames[id] =   "xl/" + target;
