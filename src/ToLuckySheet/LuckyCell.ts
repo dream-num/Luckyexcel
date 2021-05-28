@@ -148,11 +148,11 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
             let applyFill = cellXf.attributeList.applyFill;
             let applyBorder = cellXf.attributeList.applyBorder;
             let applyAlignment = cellXf.attributeList.applyAlignment;
-            
+
             if(cellXf.attributeList.applyProtection!=null){
                 applyProtection = cellXf.attributeList.applyProtection;
             }
-            
+
             if(cellXf.attributeList.quotePrefix!=null){
                 quotePrefix = cellXf.attributeList.quotePrefix;
             }
@@ -194,7 +194,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 }
             }
 
-            
+
 
             if(numFmtId!=undefined){
                 let numf = numfmts[parseInt(numFmtId)];
@@ -215,7 +215,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 }
             }
 
-            
+
             if(fontId!=undefined){
                 let fontIdNum = parseInt(fontId);
                 let font = fonts[fontIdNum];
@@ -235,7 +235,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                         if(fs!=null){
                             cellValue.fs = parseInt(fs);
                         }
-                       
+
                     }
 
                     if(colors!=null && colors.length>0){
@@ -246,7 +246,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                         }
                     }
 
-                    
+
                     if(familyOverrides!=null && familyOverrides.length>0){
                         let val = familyOverrides[0].attributeList.val;
                         if(val!=null){
@@ -260,7 +260,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                             cellValue.ff = val;
                         }
                     }
-                
+
 
                     if(bolds!=null && bolds.length>0){
                         let bold = bolds[0].attributeList.val;
@@ -403,15 +403,15 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                     cellValue.rt =  parseInt(textRotation);
                 }
 
-                
+
             }
 
             if(shrinkToFit!=undefined){//luckysheet unsupport
-                
+
             }
 
             if(indent!=undefined){//luckysheet unsupport
-                
+
             }
 
             if(borderId!=undefined){
@@ -426,7 +426,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
 
                 borderCellValue.row_index = this.r;
                 borderCellValue.col_index = this.c;
-                
+
                 let lefts = border.getInnerElements("left");
                 let rights = border.getInnerElements("right");
                 let tops = border.getInnerElements("top");
@@ -483,7 +483,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                     this._borderObject = borderObject;
                 }
             }
-            
+
         }
         else{
             cellValue.tb = 1;
@@ -495,7 +495,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
             if(/&#\d+;/.test(value)){
                 value = this.htmlDecode(value);
             }
-            
+
             if(t==ST_CellType["SharedString"]){
                 let siIndex = parseInt(v[0].value);
                 let sharedSI = sharedStrings[siIndex];
@@ -503,7 +503,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 let rFlag = sharedSI.getInnerElements("r");
                 if(rFlag==null){
                     let tFlag = sharedSI.getInnerElements("t");
-                    if(tFlag!=null){                            
+                    if(tFlag!=null){
                         let text = "";
                         tFlag.forEach((t)=>{
                             text += t.value;
@@ -528,7 +528,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                             if(cellFormat.s==null){
                                 cellFormat.s = [];
                             }
-                            
+
                             for(let i=0;i<textArray.length;i++){
                                 let w = textArray[i];
                                 let type:string = null, ff=wholef;
@@ -553,27 +553,27 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                                     let InlineString = new LuckyInlineString();
 
                                     InlineString.ff = preWholef;
-        
+
                                     if(cellValue.fc!=null){
                                         InlineString.fc = cellValue.fc;
                                     }
-                                    
+
                                     if(cellValue.fs!=null){
                                         InlineString.fs = cellValue.fs;
                                     }
-        
+
                                     if(cellValue.cl!=null){
                                         InlineString.cl = cellValue.cl;
                                     }
-        
+
                                     if(cellValue.un!=null){
                                         InlineString.un = cellValue.un;
                                     }
-        
+
                                     if(cellValue.bl!=null){
                                         InlineString.bl = cellValue.bl;
                                     }
-        
+
                                     if(cellValue.it!=null){
                                         InlineString.it = cellValue.it;
                                     }
@@ -594,23 +594,23 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                                             if(cellValue.fc!=null){
                                                 InlineStringLast.fc = cellValue.fc;
                                             }
-                                            
+
                                             if(cellValue.fs!=null){
                                                 InlineStringLast.fs = cellValue.fs;
                                             }
-                
+
                                             if(cellValue.cl!=null){
                                                 InlineStringLast.cl = cellValue.cl;
                                             }
-                
+
                                             if(cellValue.un!=null){
                                                 InlineStringLast.un = cellValue.un;
                                             }
-                
+
                                             if(cellValue.bl!=null){
                                                 InlineStringLast.bl = cellValue.bl;
                                             }
-                
+
                                             if(cellValue.it!=null){
                                                 InlineStringLast.it = cellValue.it;
                                             }
@@ -622,7 +622,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                                     else{
                                         InlineString.v = wordText;
                                     }
-                                    
+
 
                                     cellFormat.s.push(InlineString);
 
@@ -644,9 +644,9 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                         }
                         else{
 
-    
+
                             text = this.replaceSpecialWrap(text);
-    
+
                             if(text.indexOf("\r\n")>-1 || text.indexOf("\n")>-1){
                                 let InlineString = new LuckyInlineString();
                                 InlineString.v = text;
@@ -654,35 +654,35 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                                 if(cellFormat==null){
                                     cellFormat = new LuckySheetCellFormat();
                                 }
-    
+
                                 if(cellValue.ff!=null){
                                     InlineString.ff = cellValue.ff;
                                 }
-    
+
                                 if(cellValue.fc!=null){
                                     InlineString.fc = cellValue.fc;
                                 }
-                                
+
                                 if(cellValue.fs!=null){
                                     InlineString.fs = cellValue.fs;
                                 }
-    
+
                                 if(cellValue.cl!=null){
                                     InlineString.cl = cellValue.cl;
                                 }
-    
+
                                 if(cellValue.un!=null){
                                     InlineString.un = cellValue.un;
                                 }
-    
+
                                 if(cellValue.bl!=null){
                                     InlineString.bl = cellValue.bl;
                                 }
-    
+
                                 if(cellValue.it!=null){
                                     InlineString.it = cellValue.it;
                                 }
-    
+
                                 cellFormat.t = "inlineStr";
                                 cellFormat.s = [InlineString];
                                 cellValue.ct = cellFormat;
@@ -700,7 +700,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                     rFlag.forEach((r)=>{
                         let tFlag = r.getInnerElements("t");
                         let rPr = r.getInnerElements("rPr");
-                        
+
                         let InlineString = new LuckyInlineString();
 
                         if(tFlag!=null && tFlag.length>0){
@@ -720,7 +720,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                                 color = getColor(cEle[0],this.styles, "t");
                             }
 
-                            
+
                             let ff;
                             // if(family!=null){
                             //     ff = fontFamilys[family];
@@ -741,7 +741,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                             else if(cellValue.fc!=null){
                                 InlineString.fc = cellValue.fc;
                             }
-                            
+
                             if(sz!=null){
                                 InlineString.fs = parseInt(sz);
                             }
@@ -795,27 +795,27 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                             if(InlineString.ff==null && cellValue.ff!=null){
                                 InlineString.ff = cellValue.ff;
                             }
-    
+
                             if(InlineString.fc==null && cellValue.fc!=null){
                                 InlineString.fc = cellValue.fc;
                             }
-                            
+
                             if(InlineString.fs==null && cellValue.fs!=null){
                                 InlineString.fs = cellValue.fs;
                             }
-    
+
                             if(InlineString.cl==null && cellValue.cl!=null){
                                 InlineString.cl = cellValue.cl;
                             }
-    
+
                             if(InlineString.un==null && cellValue.un!=null){
                                 InlineString.un = cellValue.un;
                             }
-    
+
                             if(InlineString.bl==null && cellValue.bl!=null){
                                 InlineString.bl = cellValue.bl;
                             }
-    
+
                             if(InlineString.it==null && cellValue.it!=null){
                                 InlineString.it = cellValue.it;
                             }
@@ -835,7 +835,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 }
             }
             // else if(t==ST_CellType["InlineString"] && v!=null){
-    
+
             // }
             else {
                 value = escapeCharacter(value);
@@ -848,7 +848,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
         }
 
         return cellValue;
-    
+
     }
 
     private replaceSpecialWrap(text:string):string{
@@ -921,7 +921,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
     }
 
     private htmlDecode (str:string):string {
-        return str.replace(/&#(x)?([^&]{1,5});?/g,function($,$1,$2) {
+        return str.replace(/&#(x)?([^&]{1,5});/g,function($,$1,$2) {
             return String.fromCharCode(parseInt($2 , $1 ? 16:10));
         });
     };
