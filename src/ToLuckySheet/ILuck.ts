@@ -48,7 +48,8 @@ export interface IluckySheet{
 
     images:IluckyImages,//image list
     
-    hyperlink: IluckysheetHyperlink, // hyperlinks
+		hyperlink: IluckysheetHyperlink, // hyperlinks
+		hide: number; // sheet hide
 }
 
 //luckysheet general selection

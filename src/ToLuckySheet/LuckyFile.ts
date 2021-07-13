@@ -135,6 +135,7 @@ export class LuckyFile extends LuckyFileBase {
             let sheetId = sheet.attributeList["sheetId"]; 
             let rid = sheet.attributeList["r:id"]; 
             let sheetFile = this.getSheetFileBysheetId(rid);
+            let hide = sheet.attributeList.state === "hidden" ? 1 : 0;
 
             let drawing = this.readXml.getElementsByTagName("worksheet/drawing", sheetFile), drawingFile, drawingRelsFile;
             if(drawing!=null && drawing.length>0){
@@ -157,7 +158,8 @@ export class LuckyFile extends LuckyFileBase {
                         calcChain:this.calcChain, 
                         imageList:this.imageList,
                         drawingFile:drawingFile,
-                        drawingRelsFile:drawingRelsFile,
+                        drawingRelsFile: drawingRelsFile,
+                        hide: hide,
                     }
                 )
 
@@ -502,6 +504,10 @@ export class LuckyFile extends LuckyFileBase {
           
             if (sheet.hyperlink != null){
                 sheetout.hyperlink = sheet.hyperlink;
+            }
+          
+            if (sheet.hide != null) {
+              sheetout.hide = sheet.hide;
             }
             
             LuckyOutPutFile.sheets.push(sheetout);

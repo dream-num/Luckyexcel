@@ -38,6 +38,7 @@ export class LuckySheetBase implements IluckySheet{
     images:IluckyImages
     
     hyperlink: IluckysheetHyperlink
+    hide: number;
     
 }
 

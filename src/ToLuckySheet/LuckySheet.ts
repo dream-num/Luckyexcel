@@ -33,7 +33,8 @@ export class LuckySheet extends LuckySheetBase {
         this.sharedStrings = allFileOption.sharedStrings;
         this.calcChainEles = allFileOption.calcChain;
         this.sheetList = allFileOption.sheetList;
-        this.imageList = allFileOption.imageList;  
+        this.imageList = allFileOption.imageList;
+        this.hide = allFileOption.hide;
 
         //Output
         this.name = sheetName;
@@ -168,6 +169,9 @@ export class LuckySheet extends LuckySheetBase {
 
         // hyperlink config
         this.hyperlink = this.generateConfigHyperlinks();
+      
+        // sheet hide
+        this.hide = this.hide;
 
         if(this.mergeCells!=null){
             for(let i=0;i<this.mergeCells.length;i++){
