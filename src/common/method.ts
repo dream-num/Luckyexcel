@@ -976,3 +976,111 @@ export function getBinaryContent (path:any, options:any) {
     // provided
     return promise;
 }
+
+/**
+ * multi sequence conversion
+ * example:
+ *  1、E14 -> 13_4
+ *  2、E14 J14 O14 T14 Y14 AD14 AI14 AN14 AS14 AX14 ->
+ *     ['13_4', '13_9','13_14', '13_19', '13_24', '13_3', '13_8',  '13_13', '13_18', '13_23']
+ *  3、E46:E47 -> ['45_4',  '46_4']
+ *
+ * @param {string} sqref - before sequence
+ * @returns {string[]}
+ */
+export function getMultiSequenceToNum(sqref: string): string[] {
+  if (!sqref || sqref?.length <= 0) return [];
+  sqref = sqref.toUpperCase();
+  let sqrefRawArr = sqref.split(" ");
+  let sqrefArr = sqrefRawArr.filter((e) => e && e.trim());
+  let sqrefLastArr = getSqrefRawArrFormat(sqrefArr);
+
+  let resArr: string[] = [];
+  for (let i = 0; i < sqrefLastArr.length; i++) {
+    let _res = getSingleSequenceToNum(sqrefLastArr[i]);
+    if (_res) resArr.push(_res);
+  }
+  return resArr;
+}
+
+/**
+ * unified processing of conversion formats
+ * example:
+ *  1、['E38', 'A1:C2'] -> ['E38', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+ *
+ * @param {string[]} arr - formats arr
+ * @returns {string[]} - after arr
+ */
+export function getSqrefRawArrFormat(arr: string[]): string[] {
+  arr?.map((el) => {
+    if (el.includes(":")) {
+      let tempArr: string[] = el.split(":");
+      if (tempArr?.length === 2) {
+        let regEn = new RegExp(/[A-Z]+|[0-9]+/g);
+        let startArr = tempArr[0]?.match(regEn);
+        let lastArr = tempArr[1]?.match(regEn);
+        let columnMax = Math.max(
+          ...[ABCatNum(startArr[0]), ABCatNum(lastArr[0])]
+        );
+        let columnMin = Math.min(
+          ...[ABCatNum(startArr[0]), ABCatNum(lastArr[0])]
+        );
+        let rowMax = Math.max(...[parseInt(startArr[1]), parseInt(lastArr[1])]);
+        let rowMin = Math.min(...[parseInt(startArr[1]), parseInt(lastArr[1])]);
+        let formatArr: string[] = [];
+        
+        for (let i = columnMin; i <= columnMax; i++) {
+          for (let j = rowMin; j <= rowMax; j++) {
+            formatArr.push(`${chatatABC(i)}${j}`);
+          }
+        }
+        arr = arr.concat(formatArr);
+        arr.splice(arr.indexOf(el), 1);
+      }
+    }
+  });
+  return arr;
+}
+
+/**
+ * single sequence to number
+ * example:
+ *  1、A1 -> 0_0
+ *  2、ES14 -> 13_4
+ *
+ * @param {string} sqref - before sequence
+ * @returns {string} - after sequence
+ */
+export function getSingleSequenceToNum(sqref: string): string {
+  let sqrefArray = sqref.match(/[A-Z]+|[0-9]+/g);
+  let sqrefLen = sqrefArray.length;
+  let regEn = new RegExp("^[A-Z]+$");
+  let ret = "";
+  for (let i = sqrefLen - 1; i >= 0; i--) {
+    let cur = sqrefArray[i];
+    if (regEn.test(cur)) {
+      ret += ABCatNum(cur) + "_";
+    } else {
+      ret += parseInt(cur) - 1 + "_";
+    }
+  }
+  return ret.substring(0, ret.length - 1);
+}
+
+/**
+ * R1C1 to Sequence
+ * example: sheet2!R1C1 => sheet!A1
+ *
+ * @param {string} value - R1C1 value
+ * @returns
+ */
+ export function getTransR1C1ToSequence(value: string): string {
+  if (!value && value?.length <= 0) return "";
+  let valueArr = value.toLocaleUpperCase()?.split("!");
+  let repStr = valueArr[1] || "";
+  let indexR = repStr.indexOf("R");
+  let indexC = repStr.indexOf("C");
+  let row = Number(repStr.slice(indexR + 1, indexC));
+  let column = chatatABC(Number(repStr.slice(indexC + 1, repStr?.length)) - 1);
+  return `${valueArr[0]}!${column}${row}`;
+}

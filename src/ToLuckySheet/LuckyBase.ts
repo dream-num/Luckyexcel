@@ -1,4 +1,4 @@
-import { ILuckyFile, ILuckyFileInfo,IluckySheet,IluckySheetCelldata,IluckySheetConfig,IluckySheetCelldataValue,IluckySheetCelldataValueMerge,ILuckySheetCellFormat,IluckySheetConfigMerges,IluckySheetConfigMerge,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IluckySheetborderInfoCellForImp,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IluckysheetFrozen,IluckySheetChart,IluckySheetPivotTable,IluckysheetConditionFormat,IluckysheetCalcChain,ILuckyInlineString,IluckyImage,IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages} from "./ILuck";
+import { ILuckyFile, ILuckyFileInfo,IluckySheet,IluckySheetCelldata,IluckySheetConfig,IluckySheetCelldataValue,IluckySheetCelldataValueMerge,ILuckySheetCellFormat,IluckySheetConfigMerges,IluckySheetConfigMerge,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IluckySheetborderInfoCellForImp,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IluckysheetFrozen,IluckySheetChart,IluckySheetPivotTable,IluckysheetConditionFormat,IluckysheetCalcChain,ILuckyInlineString,IluckyImage,IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages, IluckysheetHyperlink} from "./ILuck";
 
 
 
@@ -36,6 +36,9 @@ export class LuckySheetBase implements IluckySheet{
     calcChain:IluckysheetCalcChain[]
 
     images:IluckyImages
+    
+    hyperlink: IluckysheetHyperlink
+    
 }
 
 export class LuckyFileInfo implements ILuckyFileInfo{

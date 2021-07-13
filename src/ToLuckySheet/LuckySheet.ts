@@ -1,8 +1,8 @@
-﻿import { IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IcellOtherInfo,IformulaList,IformulaListItem} from "./ILuck";
+﻿import { IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IcellOtherInfo,IformulaList,IformulaListItem, IluckysheetHyperlink, IluckysheetHyperlinkType} from "./ILuck";
 import {LuckySheetCelldata} from "./LuckyCell";
 import { IattributeList } from "../ICommon";
-import {getXmlAttibute, getColumnWidthPixel, fromulaRef,getRowHeightPixel,getcellrange,generateRandomIndex,getPxByEMUs} from "../common/method";
-import {borderTypes} from "../common/constant";
+import {getXmlAttibute, getColumnWidthPixel, fromulaRef,getRowHeightPixel,getcellrange,generateRandomIndex,getPxByEMUs, getMultiSequenceToNum, getTransR1C1ToSequence} from "../common/method";
+import {borderTypes, worksheetFilePath} from "../common/constant";
 import { ReadXml, IStyleCollections, Element,getColor } from "./ReadXml";
 import { LuckyFileBase,LuckySheetBase,LuckyConfig,LuckySheetborderInfoCellForImp,LuckySheetborderInfoCellValue,LuckysheetCalcChain,LuckySheetConfigMerge } from "./LuckyBase";
 import {ImageList} from "./LuckyImage";
@@ -165,6 +165,9 @@ export class LuckySheet extends LuckySheetBase {
                 this.calcChain.push(chain);
             }
         }
+
+        // hyperlink config
+        this.hyperlink = this.generateConfigHyperlinks();
 
         if(this.mergeCells!=null){
             for(let i=0;i<this.mergeCells.length;i++){
@@ -372,7 +375,7 @@ export class LuckySheet extends LuckySheetBase {
     /**
     * @desc This will convert cols/col to luckysheet config of column'width
     */
-   private generateConfigRowLenAndHiddenAddCell():IcellOtherInfo{
+    private generateConfigRowLenAndHiddenAddCell():IcellOtherInfo{
         let rows = this.readXml.getElementsByTagName("sheetData/row", this.sheetFile);
         let cellOtherInfo:IcellOtherInfo = {};
         let formulaList:IformulaList = {};
@@ -534,6 +537,68 @@ export class LuckySheet extends LuckySheetBase {
         }
 
         return cellOtherInfo;
+    }
+  
+    /**
+     * luckysheet config of hyperlink
+     * 
+     * @returns {IluckysheetHyperlink} - hyperlink config
+     */
+    private generateConfigHyperlinks(): IluckysheetHyperlink {
+      let rows = this.readXml.getElementsByTagName(
+        "hyperlinks/hyperlink",
+        this.sheetFile
+      );
+      let hyperlink: IluckysheetHyperlink = {};
+      for (let i = 0; i < rows.length; i++) {
+        let row = rows[i];
+        let attrList = row.attributeList;
+        let ref = getXmlAttibute(attrList, "ref", null),
+            refArr = getMultiSequenceToNum(ref),
+            _display = getXmlAttibute(attrList, "display", null),
+            _address = getXmlAttibute(attrList, "location", null),
+            _tooltip = getXmlAttibute(attrList, "tooltip", null);
+        let _type: IluckysheetHyperlinkType = _address ? "internal" : "external";
+  
+        // external hyperlink
+        if (!_address) {
+          let rid = attrList["r:id"];
+          let sheetFile = this.sheetFile;
+          let relationshipList = this.readXml.getElementsByTagName(
+            "Relationships/Relationship",
+            `xl/worksheets/_rels/${sheetFile.replace(worksheetFilePath, "")}.rels`
+          );
+  
+          const findRid = relationshipList?.find(
+            (e) => e.attributeList["Id"] === rid
+          );
+
+          if (findRid) {
+            _address = findRid.attributeList["Target"];
+            _type = findRid.attributeList[
+              "TargetMode"
+            ]?.toLocaleLowerCase() as IluckysheetHyperlinkType;
+          }
+        }
+
+        // match R1C1
+        const addressReg = new RegExp(/^.*!R([\d$])+C([\d$])*$/g)
+        if (addressReg.test(_address)) {
+          _address = getTransR1C1ToSequence(_address);
+        }
+        
+        // dynamically add hyperlinks
+        for (const ref of refArr) {
+          hyperlink[ref] = {
+            linkAddress: _address,
+            linkTooltip: _tooltip || "",
+            linkType: _type,
+            display: _display || "",
+          };
+        }
+      }
+      
+      return hyperlink;
     }
 
     // private getBorderInfo(borders:Element[]):LuckySheetborderInfoCellValueStyle{

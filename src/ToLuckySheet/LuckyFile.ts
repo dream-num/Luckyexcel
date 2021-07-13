@@ -499,6 +499,10 @@ export class LuckyFile extends LuckyFileBase {
             if(sheet.images!=null){
                 sheetout.images = sheet.images;
             }
+          
+            if (sheet.hyperlink != null){
+                sheetout.hyperlink = sheet.hyperlink;
+            }
             
             LuckyOutPutFile.sheets.push(sheetout);
         });

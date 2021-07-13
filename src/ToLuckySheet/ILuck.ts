@@ -47,7 +47,8 @@ export interface IluckySheet{
     defaultRowHeight:number, //row height pixel
 
     images:IluckyImages,//image list
-
+    
+    hyperlink: IluckysheetHyperlink, // hyperlinks
 }
 
 //luckysheet general selection
@@ -341,3 +342,16 @@ export interface IformulaListItem{
     r:number,
     c:number
 }
+
+export interface IluckysheetHyperlink {
+    [key: string]: IluckysheetHyperlinkValue;
+}
+
+export interface IluckysheetHyperlinkValue {
+    linkAddress: string;
+    linkTooltip: string;
+    linkType: IluckysheetHyperlinkType;
+    display: string;
+}
+
+export type IluckysheetHyperlinkType = "internal" | "external";
