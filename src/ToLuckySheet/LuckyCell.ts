@@ -834,9 +834,10 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                     cellValue.ct = cellFormat;
                 }
             }
-            // else if(t==ST_CellType["InlineString"] && v!=null){
-
-            // }
+            // to be confirmed
+            else if(t==ST_CellType["InlineString"] && v!=null){
+                cellValue.v = "'"+ value;
+            }
             else {
                 value = escapeCharacter(value);
                 cellValue.v = value;

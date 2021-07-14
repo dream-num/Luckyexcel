@@ -160,7 +160,6 @@ export class LuckyFile extends LuckyFileBase {
                         drawingRelsFile:drawingRelsFile,
                     }
                 )
-
                 this.columnWidthSet = [];
                 this.rowHeightSet = [];
 
