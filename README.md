@@ -115,6 +115,7 @@ A third-party plug-in is used in the project: [JSZip](https://github.com/Stuk/js
 - [@wbfsa](https://github.com/wbfsa)
 - [@wpxp123456](https://github.com/wpxp123456)
 - [@Dushusir](https://github.com/Dushusir)
+- [@xxxDeveloper](https://github.com/xxxDeveloper)
 
 ## License
 [MIT](http://opensource.org/licenses/MIT)

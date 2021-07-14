@@ -121,6 +121,7 @@ npm run build
 - [@wbfsa](https://github.com/wbfsa)
 - [@wpxp123456](https://github.com/wpxp123456)
 - [@Dushusir](https://github.com/Dushusir)
+- [@xxxDeveloper](https://github.com/xxxDeveloper)
 
 ## 版权信息
 [MIT](http://opensource.org/licenses/MIT)
