@@ -1,3 +1,4 @@
+import { IluckysheetDataVerificationType } from "./ToLuckySheet/ILuck";
 
 
 export interface IuploadfileList { 
@@ -14,4 +15,12 @@ export interface numTostring {
 
 export interface IattributeList {
     [index:string]:string
+}
+
+export interface IDataVerificationMap {
+    [key: string]: IluckysheetDataVerificationType;
+}
+
+export interface IDataVerificationType2Map {
+    [key: string]: { [key: string]: string };
 }

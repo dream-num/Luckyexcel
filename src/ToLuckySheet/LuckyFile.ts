@@ -501,6 +501,10 @@ export class LuckyFile extends LuckyFileBase {
                 sheetout.images = sheet.images;
             }
           
+            if (sheet.dataVerification != null){
+              sheetout.dataVerification = sheet.dataVerification;
+            }
+          
             if (sheet.hyperlink != null){
                 sheetout.hyperlink = sheet.hyperlink;
             }

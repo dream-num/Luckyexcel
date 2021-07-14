@@ -46,6 +46,7 @@
     "watchify": "^3.11.1"
   },
   "dependencies": {
+    "dayjs": "^1.10.6",
     "jszip": "^3.5.0"
   }
 }

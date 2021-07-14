@@ -1,4 +1,4 @@
-import {stringToNum, IattributeList, numTostring} from "../ICommon";
+import {stringToNum, IattributeList, numTostring, IDataVerificationMap, IDataVerificationType2Map} from "../ICommon";
 
 export const columeHeader_word:string[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
@@ -185,3 +185,54 @@ export const fontFamilys:IattributeList = {
     "4":"Script",
     "5":"Decorative"
 }
+
+export const DATA_VERIFICATION_MAP: IDataVerificationMap = {
+    list: "dropdown",
+    whole: "number_integer",
+    decimal: "number_decimal",
+    custom: "text_content",
+    textLength: "text_length",
+    date: "date",
+    "unknown1": "number", // no match yet
+    "unknown2": "checkbox", // no match yet
+    "unknown3": "validity", // no match yet
+};
+
+export const COMMON_TYPE2: string[] = [
+    "number",
+    "number_integer",
+    "number_decimal",
+    "text_length",
+];
+
+export const DATA_VERIFICATION_TYPE2_MAP: IDataVerificationType2Map = {
+    common: {
+      between: "bw",
+      notBetween: "nb",
+      equal: "eq",
+      notEqualTo: "ne",
+      moreThanThe: "gt",
+      lessThan: "lt",
+      greaterOrEqualTo: "gte",
+      lessThanOrEqualTo: "lte",
+    },
+    text_content: {
+      include: "include",
+      exclude: "exclude",
+      equal: "equal",
+    },
+    date: {
+      between: "bw",
+      notBetween: "nb",
+      equal: "eq",
+      notEqualTo: "ne",
+      earlierThan: "bf",
+      noEarlierThan: "nbf",
+      laterThan: "af",
+      noLaterThan: "naf",
+    },
+    validity: {
+      card: "card",
+      phone: "phone",
+    },
+};
