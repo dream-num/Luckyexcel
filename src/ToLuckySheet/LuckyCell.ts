@@ -368,6 +368,11 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                     cellValue.vt = 1;
                 }
             }
+            else {
+                //sometimes bottom style is lost after setting it in excel
+                //when vertical is undefined set it to 2.
+                cellValue.vt = 2;
+            }
 
             if(wrapText!=undefined){
                 if(wrapText=="1"){
