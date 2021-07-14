@@ -4,6 +4,7 @@ import { LuckyFile } from "./ToLuckySheet/LuckyFile";
 import {HandleZip} from './HandleZip';
 
 import {IuploadfileList} from "./ICommon";
+import { fstat } from "fs";
 
 // //demo
 // function demoHandler(){
