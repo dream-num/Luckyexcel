@@ -177,6 +177,13 @@ export const borderTypes:stringToNum = {
 }
 
 
+export let numFmtDefaultMap: IattributeList = {
+    "yyyy/m/d;@": "yyyy/MM/dd",
+    "yyyy&quot;年&quot;m&quot;月&quot;d&quot;日&quot;;@":
+      "yyyy&quot;年&quot;MM&quot;月&quot;dd&quot;日&quot;",
+    "[$-409]yyyy/m/d\\ h:mm\\ AM/PM;@": "yyyy/MM/dd hh:mm AM/PM",
+};
+
 export const fontFamilys:IattributeList = {
     "0":"defualt",
     "1":"Roman",
