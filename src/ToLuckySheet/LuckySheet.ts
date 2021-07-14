@@ -581,8 +581,6 @@ export class LuckySheet extends LuckySheetBase {
         let _prohibitInput =
           getXmlAttibute(attrList, "allowBlank", null) !== "1" ? false : true;
         
-        console.log('formulaValue', formulaValue);
-        
         // x14 processing
         const formulaReg = new RegExp(/<x14:formula1>|<xm:sqref>/g)
         if (formulaReg.test(formulaValue) && extLst?.length >= 0) {
