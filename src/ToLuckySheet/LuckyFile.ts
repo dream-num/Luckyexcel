@@ -492,6 +492,9 @@ export class LuckyFile extends LuckyFileBase {
             if(sheet.freezen!=null){
                 sheetout.freezen = sheet.freezen;
             }
+            if(sheet.frozen!=null){
+                sheetout.frozen = sheet.frozen;
+            }
 
             if(sheet.calcChain!=null){
                 sheetout.calcChain = sheet.calcChain;

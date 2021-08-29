@@ -1,4 +1,4 @@
-﻿import { IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IcellOtherInfo,IformulaList,IformulaListItem, IluckysheetHyperlink, IluckysheetHyperlinkType} from "./ILuck";
+﻿import { IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IcellOtherInfo,IformulaList,IformulaListItem, IluckysheetHyperlink, IluckysheetHyperlinkType, LuckysheetFrozen2TypeEnum} from "./ILuck";
 import {LuckySheetCelldata} from "./LuckyCell";
 import { IattributeList } from "../ICommon";
 import {getXmlAttibute, getColumnWidthPixel, fromulaRef,getRowHeightPixel,getcellrange,generateRandomIndex,getPxByEMUs, getMultiSequenceToNum, getTransR1C1ToSequence} from "../common/method";
@@ -58,6 +58,46 @@ export class LuckySheet extends LuckySheetBase {
                 let range:IluckySheetSelection = getcellrange(activeCell, this.sheetList, sheetId);
                 this.luckysheet_select_save = [];
                 this.luckysheet_select_save.push(range);
+            }
+            // pane
+            let panes = sheetView[0].getInnerElements("pane");
+            if(panes!=null && panes.length>0){
+                let pane=panes[0];
+                let paneState=getXmlAttibute(pane.attributeList, "state", "split");
+                if(paneState==='frozen'){
+                    let xSplit=+getXmlAttibute(pane.attributeList, "xSplit", "0");
+                    let ySplit=+getXmlAttibute(pane.attributeList, "ySplit", "0");
+                    this.frozen={
+                        type:LuckysheetFrozen2TypeEnum.cancel
+                    };
+                    if(xSplit==0&&ySplit==0)
+                    this.frozen.type= LuckysheetFrozen2TypeEnum.cancel;
+                    else if(xSplit==1&&ySplit==0)
+                    this.frozen.type= LuckysheetFrozen2TypeEnum.column;
+                    else if(xSplit==0&&ySplit==1)
+                    this.frozen.type= LuckysheetFrozen2TypeEnum.row;
+                    else if(xSplit==1&&ySplit==1){
+                        this.frozen.type= LuckysheetFrozen2TypeEnum.both;
+                    }else if(xSplit>1&&ySplit==0){
+                        this.frozen.type= LuckysheetFrozen2TypeEnum.rangeColumn;
+                        this.frozen.range={
+                            row_focus:0,
+                            column_focus:xSplit-1
+                        };
+                    }else if(xSplit==0&&ySplit>1){
+                        this.frozen.type= LuckysheetFrozen2TypeEnum.rangeRow;
+                        this.frozen.range={
+                            row_focus:ySplit-1,
+                            column_focus:0
+                        };
+                    }else if(xSplit>1&&ySplit>1){
+                        this.frozen.type= LuckysheetFrozen2TypeEnum.rangeBoth;
+                        this.frozen.range={
+                            row_focus:ySplit-1,
+                            column_focus:xSplit-1
+                        };
+                    }  
+                }
             }
         }
         this.showGridLines = showGridLines;

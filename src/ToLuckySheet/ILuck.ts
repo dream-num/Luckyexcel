@@ -36,6 +36,7 @@ export interface IluckySheet{
 
     luckysheet_conditionformat_save?:IluckysheetConditionFormat[],
     freezen?:IluckysheetFrozen,
+    frozen?:IluckysheetFrozen2,
 
     calcChain?:IluckysheetCalcChain[],
     
@@ -115,6 +116,26 @@ export interface IluckySheetPivotTablefilterParamItemSelected{
 export interface IluckysheetFrozen{
     horizen:number | undefined, //freeze horizen row number
     vertical:number | undefined, //freeze horizen column number
+}
+
+export interface IluckysheetFrozen2{
+    type:LuckysheetFrozen2TypeEnum,
+    range?:IluckysheetFrozen2Range
+}
+
+export interface IluckysheetFrozen2Range{
+    row_focus:number,
+    column_focus:number
+}
+
+export enum LuckysheetFrozen2TypeEnum{
+    row="row",
+    column="column",
+    both="both",
+    rangeRow="rangeRow",
+    rangeColumn="rangeColumn",
+    rangeBoth="rangeBoth",
+    cancel="cancel",
 }
 
 export interface IluckysheetConditionFormat{
