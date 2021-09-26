@@ -59,8 +59,10 @@
                                 alert("Currently only supports the import of xlsx files");
                                 return;
                             }
+                            let stts=+new Date();
+                            console.log('transform start:',stts)
                             LuckyExcel.transformExcelToLucky(files[0], function(exportJson, luckysheetfile){
-                                
+                                console.log('transform end:',+new Date(),'rang time',+new Date()-stts);
                                 if(exportJson.sheets==null || exportJson.sheets.length==0){
                                     alert("Failed to read the content of the excel file, currently does not support xls files!");
                                     return;
@@ -68,7 +70,8 @@
                                 console.log('luckysheet json',exportJson);
                                 
                                 window.luckysheet.destroy();
-                                
+                                stts=+new Date();
+                                console.log('render start:',stts);
                                 window.luckysheet.create({
                                     container: 'luckysheet', //luckysheet is the container id
                                     showinfobar:false,
@@ -76,6 +79,10 @@
                                     title:exportJson.info.name,
                                     userInfo:exportJson.info.name.creator
                                 });
+                                console.log('render end:',+new Date(),'rang time',+new Date()-stts);
+                                var html= window.luckysheet.getRangeHtml({range:"A1:AI127"});
+                                console.log('gethtml end:',+new Date(),'rang time',+new Date()-stts);
+                                console.log('html:',html)
                             });
                         });
 

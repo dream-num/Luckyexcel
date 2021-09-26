@@ -57,7 +57,7 @@ export interface IluckySheet{
 export interface IluckySheetSelection{
     row:number[], //selection start row and end row
     column:number[], //selection start column and end column
-    sheetIndex:number
+    sheetIndex?:number
 }
 
 export interface IluckySheetChart{
