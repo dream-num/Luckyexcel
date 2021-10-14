@@ -1,11 +1,12 @@
-﻿import { IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IcellOtherInfo,IformulaList,IformulaListItem, IluckysheetHyperlink, IluckysheetHyperlinkType} from "./ILuck";
+﻿import { IluckyImageBorder,IluckyImageCrop,IluckyImageDefault,IluckyImages,IluckySheetCelldata,IluckySheetCelldataValue,IMapluckySheetborderInfoCellForImp,IluckySheetborderInfoCellValue,IluckySheetborderInfoCellValueStyle,IFormulaSI,IluckySheetRowAndColumnLen,IluckySheetRowAndColumnHidden,IluckySheetSelection,IcellOtherInfo,IformulaList,IformulaListItem, IluckysheetHyperlink, IluckysheetHyperlinkType, IluckysheetDataVerification} from "./ILuck";
 import {LuckySheetCelldata} from "./LuckyCell";
 import { IattributeList } from "../ICommon";
-import {getXmlAttibute, getColumnWidthPixel, fromulaRef,getRowHeightPixel,getcellrange,generateRandomIndex,getPxByEMUs, getMultiSequenceToNum, getTransR1C1ToSequence} from "../common/method";
-import {borderTypes, worksheetFilePath} from "../common/constant";
+import {getXmlAttibute, getColumnWidthPixel, fromulaRef,getRowHeightPixel,getcellrange,generateRandomIndex,getPxByEMUs, getMultiSequenceToNum, getTransR1C1ToSequence, getPeelOffX14, getMultiFormulaValue} from "../common/method";
+import {borderTypes, COMMON_TYPE2, DATA_VERIFICATION_MAP, DATA_VERIFICATION_TYPE2_MAP, worksheetFilePath} from "../common/constant";
 import { ReadXml, IStyleCollections, Element,getColor } from "./ReadXml";
 import { LuckyFileBase,LuckySheetBase,LuckyConfig,LuckySheetborderInfoCellForImp,LuckySheetborderInfoCellValue,LuckysheetCalcChain,LuckySheetConfigMerge } from "./LuckyBase";
 import {ImageList} from "./LuckyImage";
+import dayjs from "dayjs";
 
 export class LuckySheet extends LuckySheetBase {
 
@@ -166,6 +167,9 @@ export class LuckySheet extends LuckySheetBase {
                 this.calcChain.push(chain);
             }
         }
+      
+        // dataVerification config
+        this.dataVerification = this.generateConfigDataValidations();
 
         // hyperlink config
         this.hyperlink = this.generateConfigHyperlinks();
@@ -541,6 +545,114 @@ export class LuckySheet extends LuckySheetBase {
         }
 
         return cellOtherInfo;
+    }
+  
+    /**
+     * luckysheet config of dataValidations
+     * 
+     * @returns {IluckysheetDataVerification} - dataValidations config
+     */
+    private generateConfigDataValidations(): IluckysheetDataVerification {
+      
+      let rows = this.readXml.getElementsByTagName(
+        "dataValidations/dataValidation",
+        this.sheetFile
+      );
+      let extLst =
+        this.readXml.getElementsByTagName(
+          "extLst/ext/x14:dataValidations/x14:dataValidation",
+          this.sheetFile
+        ) || [];
+      
+      rows = rows.concat(extLst);
+  
+      let dataVerification: IluckysheetDataVerification = {};
+  
+      for (let i = 0; i < rows.length; i++) {
+        let row = rows[i];
+        let attrList = row.attributeList;
+        let formulaValue = row.value;
+  
+        let type = getXmlAttibute(attrList, "type", null);
+        let operator = "",
+            sqref = "",
+            sqrefIndexArr: string[] = [],
+            valueArr: string[] = [];
+        let _prohibitInput =
+          getXmlAttibute(attrList, "allowBlank", null) !== "1" ? false : true;
+        
+        // x14 processing
+        const formulaReg = new RegExp(/<x14:formula1>|<xm:sqref>/g)
+        if (formulaReg.test(formulaValue) && extLst?.length >= 0) {
+          operator = getXmlAttibute(attrList, "operator", null);
+          const peelOffData = getPeelOffX14(formulaValue);
+          sqref = peelOffData?.sqref;
+          sqrefIndexArr = getMultiSequenceToNum(sqref);
+          valueArr = getMultiFormulaValue(peelOffData?.formula);
+        } else {
+          operator = getXmlAttibute(attrList, "operator", null);
+          sqref = getXmlAttibute(attrList, "sqref", null);
+          sqrefIndexArr = getMultiSequenceToNum(sqref);
+          valueArr = getMultiFormulaValue(formulaValue);
+        }
+
+        let _type = DATA_VERIFICATION_MAP[type];
+        let _type2 = null;
+        let _value1: string | number = valueArr?.length >= 1 ? valueArr[0] : "";
+        let _value2: string | number = valueArr?.length === 2 ? valueArr[1] : "";
+        let _hint = getXmlAttibute(attrList, "prompt", null);
+        let _hintShow = _hint ? true : false
+  
+        const matchType = COMMON_TYPE2.includes(_type) ? "common" : _type;
+        _type2 = operator
+          ? DATA_VERIFICATION_TYPE2_MAP[matchType][operator]
+          : "bw";
+        
+        // mobile phone number processing
+        if (
+          _type === "text_content" &&
+          (_value1?.includes("LEN") || _value1?.includes("len")) &&
+          _value1?.includes("=11")
+        ) {
+          _type = "validity";
+          _type2 = "phone";
+        }
+
+        // date processing
+        if (_type === "date") {
+          const D1900 = new Date(1899, 11, 30, 0, 0, 0);
+          _value1 = dayjs(D1900)
+            .clone()
+            .add(Number(_value1), "day")
+            .format("YYYY-MM-DD");
+          _value2 = dayjs(D1900)
+            .clone()
+            .add(Number(_value2), "day")
+            .format("YYYY-MM-DD");
+        }
+        
+        // checkbox and dropdown processing
+        if (_type === "checkbox" || _type === "dropdown") {
+          _type2 = null;
+        }
+        
+        // dynamically add dataVerifications
+        for (const ref of sqrefIndexArr) {
+          dataVerification[ref] = {
+            type: _type,
+            type2: _type2,
+            value1: _value1,
+            value2: _value2,
+            checked: false,
+            remote: false,
+            prohibitInput: _prohibitInput,
+            hintShow: _hintShow,
+            hintText: _hint
+          };
+        }
+      }
+  
+      return dataVerification;
     }
   
     /**

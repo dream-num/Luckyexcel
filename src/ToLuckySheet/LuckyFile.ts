@@ -1,7 +1,7 @@
 ﻿import { ILuckyFile,IluckySheetRowAndColumnHidden,IluckySheetRowAndColumnLen} from "./ILuck";
 import { LuckySheet} from "./LuckySheet";
 import {IuploadfileList, IattributeList} from "../ICommon";
-import {workBookFile, coreFile, appFile, stylesFile, sharedStringsFile,numFmtDefault,theme1File,calcChainFile,workbookRels} from "../common/constant";
+import {workBookFile, coreFile, appFile, stylesFile, sharedStringsFile,numFmtDefault,theme1File,calcChainFile,workbookRels, numFmtDefaultMap} from "../common/constant";
 import { ReadXml,IStyleCollections,Element } from "./ReadXml";
 import {getXmlAttibute} from "../common/method";
 import { LuckyFileBase,LuckyFileInfo,LuckySheetBase,LuckySheetCelldataBase,LuckySheetCelldataValue,LuckySheetCellFormat } from "./LuckyBase";
@@ -48,7 +48,7 @@ export class LuckyFile extends LuckyFileBase {
             let formatcode = getXmlAttibute(attrList, "formatCode", "@");
             // console.log(numfmtid, formatcode);
             if(!(numfmtid in numFmtDefault)){
-                numFmtDefaultC[numfmtid] = formatcode;
+                numFmtDefaultC[numfmtid] = numFmtDefaultMap[formatcode] || formatcode;
             }
         }
 
@@ -499,6 +499,10 @@ export class LuckyFile extends LuckyFileBase {
 
             if(sheet.images!=null){
                 sheetout.images = sheet.images;
+            }
+          
+            if (sheet.dataVerification != null){
+              sheetout.dataVerification = sheet.dataVerification;
             }
           
             if (sheet.hyperlink != null){

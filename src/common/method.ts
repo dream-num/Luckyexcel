@@ -1004,6 +1004,34 @@ export function getMultiSequenceToNum(sqref: string): string[] {
 }
 
 /**
+ * get region sequence
+ * example:
+ *  1、[A1:C2'] -> ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+ *
+ * @param {string[]} arr - formats arr
+ * @returns {string[]} - after arr
+ */
+export function getRegionSequence(arr: string[]): string[] {
+  let formatArr: string[] = [];
+  
+  const regEn = new RegExp(/[A-Z]+|[0-9]+/g);
+  const startArr = arr[0]?.match(regEn);
+  const lastArr = arr[1]?.match(regEn);
+  const columnMax = Math.max(...[ABCatNum(startArr[0]), ABCatNum(lastArr[0])]);
+  const columnMin = Math.min(...[ABCatNum(startArr[0]), ABCatNum(lastArr[0])]);
+  const rowMax = Math.max(...[parseInt(startArr[1]), parseInt(lastArr[1])]);
+  const rowMin = Math.min(...[parseInt(startArr[1]), parseInt(lastArr[1])]);
+  
+  for (let i = columnMin; i <= columnMax; i++) {
+    for (let j = rowMin; j <= rowMax; j++) {
+      formatArr.push(`${chatatABC(i)}${j}`);
+    }
+  }
+
+  return formatArr;
+}
+
+/**
  * unified processing of conversion formats
  * example:
  *  1、['E38', 'A1:C2'] -> ['E38', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2']
@@ -1016,30 +1044,17 @@ export function getSqrefRawArrFormat(arr: string[]): string[] {
     if (el.includes(":")) {
       let tempArr: string[] = el.split(":");
       if (tempArr?.length === 2) {
-        let regEn = new RegExp(/[A-Z]+|[0-9]+/g);
-        let startArr = tempArr[0]?.match(regEn);
-        let lastArr = tempArr[1]?.match(regEn);
-        let columnMax = Math.max(
-          ...[ABCatNum(startArr[0]), ABCatNum(lastArr[0])]
-        );
-        let columnMin = Math.min(
-          ...[ABCatNum(startArr[0]), ABCatNum(lastArr[0])]
-        );
-        let rowMax = Math.max(...[parseInt(startArr[1]), parseInt(lastArr[1])]);
-        let rowMin = Math.min(...[parseInt(startArr[1]), parseInt(lastArr[1])]);
-        let formatArr: string[] = [];
-        
-        for (let i = columnMin; i <= columnMax; i++) {
-          for (let j = rowMin; j <= rowMax; j++) {
-            formatArr.push(`${chatatABC(i)}${j}`);
-          }
-        }
-        arr = arr.concat(formatArr);
+        arr = arr.concat(getRegionSequence(tempArr));
         arr.splice(arr.indexOf(el), 1);
       }
     }
   });
-  return arr;
+
+  const resultArr = arr.filter(
+    (value, index, array) => array.indexOf(value) === index
+  );
+
+  return resultArr;
 }
 
 /**
@@ -1074,13 +1089,78 @@ export function getSingleSequenceToNum(sqref: string): string {
  * @param {string} value - R1C1 value
  * @returns
  */
- export function getTransR1C1ToSequence(value: string): string {
+export function getTransR1C1ToSequence(value: string): string {
   if (!value && value?.length <= 0) return "";
-  let valueArr = value.toLocaleUpperCase()?.split("!");
-  let repStr = valueArr[1] || "";
-  let indexR = repStr.indexOf("R");
-  let indexC = repStr.indexOf("C");
-  let row = Number(repStr.slice(indexR + 1, indexC));
-  let column = chatatABC(Number(repStr.slice(indexC + 1, repStr?.length)) - 1);
+
+  const len = value.length;
+  const index = value.lastIndexOf("!");
+  const valueArr = [value.slice(0, index), value.slice(index + 1, len)];
+  const repStr = valueArr[1] || "";
+  const indexR = repStr.indexOf("R");
+  const indexC = repStr.indexOf("C");
+  
+  const row = Number(repStr.slice(indexR + 1, indexC));
+  const column = chatatABC(Number(repStr.slice(indexC + 1, repStr?.length)) - 1);
+
   return `${valueArr[0]}!${column}${row}`;
+}
+
+/**
+ * strip x14 format data
+ *
+ * @param {string} value
+ * @returns {Object} - { formula, sqref }
+ */
+export function getPeelOffX14(value: string): {  [key: string]: any} {
+  if (!value || value?.length <= 0) return {};
+
+  // formula
+  const formulaReg = new RegExp("</x14:formula[^]>", "g");
+  const lastIndex = value.match(formulaReg)?.length;
+  const lastValue = `</x14:formula${lastIndex}>`;
+  const lastValueEnd = value.indexOf(lastValue);
+  let formulaValue = value.substring(0, lastValueEnd + lastValue.length);
+  formulaValue = formulaValue
+    .replace(/<xm:f>/g, "")
+    .replace(/<\/xm:f>/g, "")
+    .replace(/x14:/g, "")
+    .replace(/\/x14:/g, "");
+  const formula = formulaValue;
+  
+  // sqref
+  const xmSqrefLen = "<xm:sqref>".length;
+  const sqrefStart = value.indexOf("<xm:sqref>");
+  const sqrefEnd = value.indexOf("</xm:sqref>");
+  const sqref = value.substring(sqrefStart + xmSqrefLen, sqrefEnd);
+
+  return {
+    formula,
+    sqref,
+  };
+}
+
+
+/**
+ * get the value in the formula
+ *
+ * @param {string} value - extracted value
+ * @returns {string[]}
+ */
+export function getMultiFormulaValue(value: string): string[] {
+  if (!value || value?.length <= 0) return [];
+  
+  const lenReg = new RegExp("formula", "g");
+  const len = (value.match(lenReg)?.length || 0) / 2;
+  
+  if (len === 0) return [];
+  
+  let retArr: any = [];
+  for (let i = 1; i <= len; i++) {
+    const startLen = `<formula${i}>`?.length;
+    const start = value.indexOf(`<formula${i}>`);
+    const end = value.indexOf(`</formula${i}>`);
+    const _value = value.substring(start + startLen, end);
+    retArr.push(escapeCharacter(_value.replace(/&quot;/g, "")));
+  }
+  return retArr;
 }
