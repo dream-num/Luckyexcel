@@ -152,7 +152,7 @@ export class LuckySheet extends LuckySheetBase {
               row_focus: ySplit - 1,
               column_focus: 0,
             };
-          } else if (xSplit > 1 && ySplit > 1) {
+          } else if (xSplit >= 1 && ySplit >= 1) {
             this.frozen.type = LuckysheetFrozen2TypeEnum.rangeBoth;
             this.frozen.range = {
               row_focus: ySplit - 1,
