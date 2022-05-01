@@ -88,6 +88,29 @@ export class LuckySheet extends LuckySheetBase {
 
         this.generateConfigColumnLenAndHidden();
         let cellOtherInfo:IcellOtherInfo =  this.generateConfigRowLenAndHiddenAddCell();
+        
+        if(this.calcChain==null){
+            this.calcChain = [];
+        }
+
+        let formulaListExist:IformulaList={};
+        for(let c=0;c<this.calcChainEles.length;c++){
+            let calcChainEle = this.calcChainEles[c], attrList = calcChainEle.attributeList;
+            if(attrList.i!=sheetId){
+                continue;
+            }
+
+            let r = attrList.r , i = attrList.i, l = attrList.l, s = attrList.s, a = attrList.a, t = attrList.t;
+
+            let range = getcellrange(r);
+            let chain = new LuckysheetCalcChain();
+            chain.r = range.row[0];
+            chain.c = range.column[0];
+            chain.index = this.index;
+            this.calcChain.push(chain);
+            formulaListExist["r"+r+"c"+c] = null;
+        }
+        
 
         if(this.formulaRefList!=null){
             for(let key in this.formulaRefList){
@@ -129,32 +152,16 @@ export class LuckySheet extends LuckySheetBase {
 
                     (cellValue.v as IluckySheetCelldataValue ).f = func;
                     
+                    //添加共享公式链
+                    let chain = new LuckysheetCalcChain();
+                    chain.r = cellValue.r;
+                    chain.c = cellValue.c;
+                    chain.index = this.index;
+                    this.calcChain.push(chain);
                 }
             }
         }
 
-
-        if(this.calcChain==null){
-            this.calcChain = [];
-        }
-
-        let formulaListExist:IformulaList={};
-        for(let c=0;c<this.calcChainEles.length;c++){
-            let calcChainEle = this.calcChainEles[c], attrList = calcChainEle.attributeList;
-            if(attrList.i!=sheetId){
-                continue;
-            }
-
-            let r = attrList.r , i = attrList.i, l = attrList.l, s = attrList.s, a = attrList.a, t = attrList.t;
-
-            let range = getcellrange(r);
-            let chain = new LuckysheetCalcChain();
-            chain.r = range.row[0];
-            chain.c = range.column[0];
-            chain.index = this.index;
-            this.calcChain.push(chain);
-            formulaListExist["r"+r+"c"+c] = null;
-        }
 
         //There may be formulas that do not appear in calcChain
         for(let key in cellOtherInfo.formulaList){
