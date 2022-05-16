@@ -303,7 +303,7 @@ export class LuckyFile extends LuckyFileBase {
             imageObject.default.width = cx_n;
         }
 
-        console.log(this.columnWidthSet, this.rowHeightSet);
+        //console.log(this.columnWidthSet, this.rowHeightSet);
     }
 
     /**
