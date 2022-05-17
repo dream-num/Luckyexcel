@@ -105,19 +105,21 @@ import { fstat } from "fs";
 
 // api
 export class LuckyExcel{
-    static transformExcelToLucky(excelFile:File, callBack?:(files:IuploadfileList, fs?:string)=>void){
+    static transformExcelToLucky(excelFile: File,
+        resolve?: (files: IuploadfileList, fs?: string) => void,
+        reject?: (err:Error) => void) {
         let handleZip:HandleZip = new HandleZip(excelFile);
-        handleZip.unzipFile(function(files:IuploadfileList){
+        
+        handleZip.unzipFile(function (files: IuploadfileList) {
             let luckyFile = new LuckyFile(files, excelFile.name);
             let luckysheetfile = luckyFile.Parse();
             let exportJson = JSON.parse(luckysheetfile);
-            if(callBack != undefined){
-                callBack(exportJson, luckysheetfile);
+            if(resolve != undefined){
+                resolve(exportJson, luckysheetfile);
             }
-            
         },
         function(err:Error){
-            console.error(err);
+            reject(err);
         });
     }
 
@@ -136,7 +138,7 @@ export class LuckyExcel{
         });
     }
 
-    static transformLuckyToExcel(LuckyFile: any, callBack?: (files: string) => void) {
+    static transformLuckyToExcel(LuckyFile: any, callBack?: (files: string) => void, ) {
         
     }
 }
