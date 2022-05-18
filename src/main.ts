@@ -142,7 +142,7 @@ export class LuckyExcel{
         });
     }
 
-    static transformLuckyToExcel(LuckyFile: any, callBack?: (files: string) => void, ) {
+    static transformLuckyToExcel(LuckyFile: any, callBack?: (files: string) => void) {
         
     }
 }
