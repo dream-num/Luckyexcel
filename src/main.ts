@@ -119,7 +119,11 @@ export class LuckyExcel{
             }
         },
         function(err:Error){
-            reject(err);
+            if (reject) {
+                reject(err);
+              } else {
+                console.error(err);
+              }
         });
     }
 
