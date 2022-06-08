@@ -581,6 +581,9 @@ export class LuckySheet extends LuckySheetBase {
         let formulaValue = row.value;
   
         let type = getXmlAttibute(attrList, "type", null);
+        if(!type) {
+            continue;
+        }
         let operator = "",
             sqref = "",
             sqrefIndexArr: string[] = [],
