@@ -11,7 +11,7 @@ export class LuckySheetBase implements IluckySheet{
     name:string
     color:string
     config:IluckySheetConfig
-    index:string
+    id:string
     status:string
     order:string
     row:number
@@ -143,7 +143,7 @@ export class LuckySheetConfigMerge implements IluckySheetConfigMerge{
 export class LuckysheetCalcChain implements IluckysheetCalcChain{
     r:number
     c:number
-    index:string | undefined
+    id:string | undefined
 }
 
 

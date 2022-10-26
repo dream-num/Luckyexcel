@@ -39,7 +39,7 @@ export class LuckySheet extends LuckySheetBase {
 
         //Output
         this.name = sheetName;
-        this.index = sheetId;
+        this.id = sheetId;
         this.order = sheetOrder.toString();
         this.config = new LuckyConfig();
         this.celldata = [];
@@ -106,7 +106,7 @@ export class LuckySheet extends LuckySheetBase {
             let chain = new LuckysheetCalcChain();
             chain.r = range.row[0];
             chain.c = range.column[0];
-            chain.index = this.index;
+            chain.id = this.id;
             this.calcChain.push(chain);
             formulaListExist["r"+r+"c"+c] = null;
         }
@@ -156,7 +156,7 @@ export class LuckySheet extends LuckySheetBase {
                     let chain = new LuckysheetCalcChain();
                     chain.r = cellValue.r;
                     chain.c = cellValue.c;
-                    chain.index = this.index;
+                    chain.id = this.id;
                     this.calcChain.push(chain);
                 }
             }
@@ -170,7 +170,7 @@ export class LuckySheet extends LuckySheetBase {
                 let chain = new LuckysheetCalcChain();
                 chain.r = formulaListItem.r;
                 chain.c = formulaListItem.c;
-                chain.index = this.index;
+                chain.id = this.id;
                 this.calcChain.push(chain);
             }
         }

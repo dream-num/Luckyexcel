@@ -17,7 +17,7 @@ export interface IluckySheet{
     name:string,// Sheet name, it will show on sheet bar, must be unique
     color:string,// Sheet color, it will show on sheet bar
     config?:IluckySheetConfig, // Row height, column width, hidden, and so on
-    index:string, //A sheet uniquely identifies, 
+    id:string, //A sheet uniquely identifies, 
     status:string, //If 1 , it means current shown sheet, else means hidden
     order:string, //Order of sheet
     row:number,// Sheet the number of rows, contain blank cell
@@ -141,7 +141,7 @@ export interface IluckysheetCFIconsFormat{
 export interface IluckysheetCalcChain{
     r:number,
     c:number,
-    index:string | undefined,
+    id:string | undefined,
     // func?:any[],//[true, 152, "=SUBTOTAL(9,OFFSET(F15,ROW(F15:F18)-ROW(F15),1,3))"] 已经计算、终值、公式
 }
 

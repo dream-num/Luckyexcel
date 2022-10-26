@@ -413,8 +413,8 @@ export class LuckyFile extends LuckyFileBase {
                 // }
             }
 
-            if(sheet.index!=null){
-                sheetout.index = sheet.index;
+            if(sheet.id!=null){
+                sheetout.id = sheet.id;
             }
 
             if(sheet.status!=null){
