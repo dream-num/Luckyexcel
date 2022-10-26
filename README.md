@@ -32,21 +32,17 @@ The goal is to support all features supported by Luckysheet
 <script src="https://cdn.jsdelivr.net/npm/luckyexcel/dist/luckyexcel.umd.js"></script>
 <script>
     // Make sure to get the xlsx file first, and then use the global method window.LuckyExcel to convert
-    LuckyExcel.transformExcelToLucky(
-        file, 
-        function(exportJson, luckysheetfile){
-            // After obtaining the converted table data, use luckysheet to initialize or update the existing luckysheet workbook
-            // Note: Luckysheet needs to introduce a dependency package and initialize the table container before it can be used
-            luckysheet.create({
-                container: 'luckysheet', // luckysheet is the container id
-                data:exportJson.sheets,
-                title:exportJson.info.name,
-                userInfo:exportJson.info.name.creator
-            });
-        },
-        function(err){
-            logger.error('Import failed. Is your fail a valid xlsx?');
+    LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
+        
+        // After obtaining the converted table data, use luckysheet to initialize or update the existing luckysheet workbook
+        // Note: Luckysheet needs to introduce a dependency package and initialize the table container before it can be used
+        luckysheet.create({
+            container: 'luckysheet', // luckysheet is the container id
+            data:exportJson.sheets,
+            title:exportJson.info.name,
+            userInfo:exportJson.info.name.creator
         });
+    });
 </script>
 ```
 > Case [Demo index.html](./src/index.html) shows the detailed usage
@@ -63,14 +59,9 @@ npm install luckyexcel
 import LuckyExcel from 'luckyexcel'
 
 // After getting the xlsx file
-LuckyExcel.transformExcelToLucky(data, 
-    function(exportJson, luckysheetfile){
-        // Get the worksheet data after conversion
-    },
-    function(error){
-        // handle error if any thrown
-    }
-)
+LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
+    //Get the worksheet data after conversion
+});
 ```
 > Case [luckysheet-vue](https://github.com/mengshukeji/luckysheet-vue)
 
@@ -79,14 +70,14 @@ LuckyExcel.transformExcelToLucky(data,
 var fs = require("fs");
 var LuckyExcel = require('luckyexcel');
 
-// Read an xlsx file
+// Read a xlsx file
 fs.readFile("House cleaning checklist.xlsx", function(err, data) {
     if (err) throw err;
 
     LuckyExcel.transformExcelToLucky(data, function(exportJson, luckysheetfile){
         // Get the worksheet data after conversion
     });
-    
+
 });
 ```
 > Case [Luckyexcel-node](https://github.com/mengshukeji/Luckyexcel-node)
@@ -124,7 +115,6 @@ A third-party plug-in is used in the project: [JSZip](https://github.com/Stuk/js
 - [@wbfsa](https://github.com/wbfsa)
 - [@wpxp123456](https://github.com/wpxp123456)
 - [@Dushusir](https://github.com/Dushusir)
-- [@xxxDeveloper](https://github.com/xxxDeveloper)
 
 ## License
 [MIT](http://opensource.org/licenses/MIT)

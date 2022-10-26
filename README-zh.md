@@ -33,22 +33,17 @@ Luckyexcel，是一个适配 [Luckysheet](https://github.com/mengshukeji/Luckysh
 <script src="https://cdn.jsdelivr.net/npm/luckyexcel/dist/luckyexcel.umd.js"></script>
 <script>
     // 先确保获取到了xlsx文件file，再使用全局方法window.LuckyExcel转化
-    LuckyExcel.transformExcelToLucky(
-        file, 
-        function(exportJson, luckysheetfile){
-            // 获得转化后的表格数据后，使用luckysheet初始化，或者更新已有的luckysheet工作簿
-            // 注：luckysheet需要引入依赖包和初始化表格容器才可以使用
-            luckysheet.create({
-                container: 'luckysheet', // luckysheet is the container id
-                data:exportJson.sheets,
-                title:exportJson.info.name,
-                userInfo:exportJson.info.name.creator
-            });
-        },
-        function(err){
-            logger.error('Import failed. Is your fail a valid xlsx?');
-        }
-    );
+    LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
+        
+        // 获得转化后的表格数据后，使用luckysheet初始化，或者更新已有的luckysheet工作簿
+        // 注：luckysheet需要引入依赖包和初始化表格容器才可以使用
+        luckysheet.create({
+            container: 'luckysheet', // luckysheet is the container id
+            data:exportJson.sheets,
+            title:exportJson.info.name,
+            userInfo:exportJson.info.name.creator
+        });
+    });
 </script>
 ```
 > 案例 [Demo index.html](./src/index.html)展示了详细的用法
@@ -65,15 +60,9 @@ npm install luckyexcel
 import LuckyExcel from 'luckyexcel'
 
 // 得到xlsx文件后
-LuckyExcel.transformExcelToLucky(
-    file, 
-    function(exportJson, luckysheetfile){
-        // 转换后获取工作表数据
-    },
-    function(error){
-        // 如果抛出任何错误，则处理错误
-    }
-)
+LuckyExcel.transformExcelToLucky(file, function(exportJson, luckysheetfile){
+    // 转换后获取工作表数据
+});
 ```
 > 案例 [luckysheet-vue](https://github.com/mengshukeji/luckysheet-vue)
 
@@ -132,7 +121,6 @@ npm run build
 - [@wbfsa](https://github.com/wbfsa)
 - [@wpxp123456](https://github.com/wpxp123456)
 - [@Dushusir](https://github.com/Dushusir)
-- [@xxxDeveloper](https://github.com/xxxDeveloper)
 
 ## 版权信息
 [MIT](http://opensource.org/licenses/MIT)
