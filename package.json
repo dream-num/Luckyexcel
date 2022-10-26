@@ -19,7 +19,6 @@
     "type": "git",
     "url": "https://github.com/mengshukeji/Luckyexcel.git"
   },
-  "files": ["dist/*", "LICENSE", "package.json", "README.md", "README-zh.md", "tsconfig.json"],
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.10.5",
