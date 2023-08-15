@@ -8,6 +8,9 @@ export interface IuploadfileList {
 export interface stringToNum {
     [index:string] : number
 }
+export interface stringToBoolean {
+    [index:string] : boolean
+}
 
 export interface numTostring {
     [index:number] : string

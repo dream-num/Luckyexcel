@@ -1,9 +1,11 @@
 import { LuckyFile } from "./ToLuckySheet/LuckyFile";
+import { ExcelFile } from './toExcel/ExcelFile'
 // import {SecurityDoor,Car} from './content';
 
-import {HandleZip} from './HandleZip';
+import { HandleZip } from './HandleZip';
 
-import {IuploadfileList} from "./ICommon";
+import { IuploadfileList } from "./ICommon";
+import XLSX from 'xlsx-js-style';
 import { fstat } from "fs";
 
 // //demo
@@ -13,9 +15,9 @@ import { fstat } from "fs";
 //     let downlodDemo = document.getElementById("Luckyexcel-downlod-file");
 //     let mask = document.getElementById("lucky-mask-demo");
 //     if(upload){
-        
+
 //         window.onload = () => {
-            
+
 //             upload.addEventListener("change", function(evt){
 //                 var files:FileList = (evt.target as any).files;
 //                 if(files==null || files.length==0){
@@ -30,14 +32,14 @@ import { fstat } from "fs";
 //                     return;
 //                 }
 //                 LuckyExcel.transformExcelToLucky(files[0], function(exportJson:any, luckysheetfile:string){
-                    
+
 //                     if(exportJson.sheets==null || exportJson.sheets.length==0){
 //                         alert("Failed to read the content of the excel file, currently does not support xls files!");
 //                         return;
 //                     }
 //                     console.log(exportJson, luckysheetfile);
 //                     window.luckysheet.destroy();
-                    
+
 //                     window.luckysheet.create({
 //                         container: 'luckysheet', //luckysheet is the container id
 //                         showinfobar:false,
@@ -58,7 +60,7 @@ import { fstat } from "fs";
 //                 }
 //                 mask.style.display = "flex";
 //                 LuckyExcel.transformExcelToLuckyByUrl(value, name, function(exportJson:any, luckysheetfile:string){
-                    
+
 //                     if(exportJson.sheets==null || exportJson.sheets.length==0){
 //                         alert("Failed to read the content of the excel file, currently does not support xls files!");
 //                         return;
@@ -66,7 +68,7 @@ import { fstat } from "fs";
 //                     console.log(exportJson, luckysheetfile);
 //                     mask.style.display = "none";
 //                     window.luckysheet.destroy();
-                    
+
 //                     window.luckysheet.create({
 //                         container: 'luckysheet', //luckysheet is the container id
 //                         showinfobar:false,
@@ -104,12 +106,12 @@ import { fstat } from "fs";
 // demoHandler();
 
 // api
-export class LuckyExcel{
+export class LuckyExcel {
     static transformExcelToLucky(excelFile: File,
         callback?: (files: IuploadfileList, fs?: string) => void,
         errorHandler?: (err: Error) => void) {
-        let handleZip:HandleZip = new HandleZip(excelFile);
-        
+        let handleZip: HandleZip = new HandleZip(excelFile);
+
         handleZip.unzipFile(function (files: IuploadfileList) {
             let luckyFile = new LuckyFile(files, excelFile.name);
             let luckysheetfile = luckyFile.Parse();
@@ -118,13 +120,13 @@ export class LuckyExcel{
                 callback(exportJson, luckysheetfile);
             }
         },
-        function(err:Error){
-            if (errorHandler) {
-                errorHandler(err);
-              } else {
-                console.error(err);
-              }
-        });
+            function (err: Error) {
+                if (errorHandler) {
+                    errorHandler(err);
+                } else {
+                    console.error(err);
+                }
+            });
     }
 
     static transformExcelToLuckyByUrl(
@@ -132,26 +134,41 @@ export class LuckyExcel{
         name: string,
         callBack?: (files: IuploadfileList, fs?: string) => void,
         errorHandler?: (err: Error) => void) {
-        let handleZip:HandleZip = new HandleZip();
-        handleZip.unzipFileByUrl(url, function(files:IuploadfileList){
+        let handleZip: HandleZip = new HandleZip();
+        handleZip.unzipFileByUrl(url, function (files: IuploadfileList) {
             let luckyFile = new LuckyFile(files, name);
             let luckysheetfile = luckyFile.Parse();
             let exportJson = JSON.parse(luckysheetfile);
-            if(callBack != undefined){
+            if (callBack != undefined) {
                 callBack(exportJson, luckysheetfile);
             }
         },
-        function(err:Error){
-            if (errorHandler) {
-                errorHandler(err);
-              } else {
-                console.error(err);
-              }
-        });
+            function (err: Error) {
+                if (errorHandler) {
+                    errorHandler(err);
+                } else {
+                    console.error(err);
+                }
+            });
+    }
+
+    static readExcel(
+        data: any,
+        callBack?: (files: string) => void,
+        errorHandler?: (err: Error) => void) {
+        const workbook = XLSX.read(data, { bookDeps: true, cellStyles: true, raw: true, cellNF: true });
     }
 
     static transformLuckyToExcel(
-        LuckyFile: any,
-        callBack?: (files: string) => void ,
-        errorHandler?: (err: Error) => void){ }
+        luckysheetJson: any,
+        callBack?: (files: any) => void,
+        errorHandler?: (err: Error) => void) {
+        try {
+            const excelFile = new ExcelFile(luckysheetJson)
+            excelFile.export();
+            callBack(excelFile)
+        } catch(e) {
+            errorHandler(e)
+        }
+    }
 }
