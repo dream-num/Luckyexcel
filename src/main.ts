@@ -166,9 +166,9 @@ export class LuckyExcel {
         try {
             const excelFile = new ExcelFile(luckysheetJson)
             excelFile.export();
-            callBack(excelFile)
+            callBack?.(excelFile)
         } catch(e) {
-            errorHandler(e)
+            errorHandler?.(e)
         }
     }
 }
