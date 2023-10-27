@@ -16,9 +16,15 @@ export class WorkCell extends WorkCellBase {
     this.key = XLSX.utils.encode_cell({ c, r })
     this.data = {v: '', t: 's', s: {}}
 
-    if (v !== undefined && ct !== undefined) {
-      this.data.v = v
-      this.data.t = ct.t
+    if (ct !== undefined) {
+      if (v !== undefined) {
+        this.data.v = v
+        this.data.t = ct.t
+      } else if (Array.isArray(ct.s)) {
+        // inline string格式的简易处理
+        this.data.t = 's'
+        this.data.v = ct?.s?.reduce((prev: any, cur: { v: any; }) => prev + cur.v, '');
+      }
 
       // 数字
       if (ct?.t === 'n') {
