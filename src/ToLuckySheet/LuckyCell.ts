@@ -416,7 +416,10 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
             }
 
             if(indent!=undefined){//luckysheet unsupport
-
+                const result = parseInt(indent)
+                if (!isNaN(result)) {
+                    cellValue.ti = result
+                }
             }
 
             if(borderId!=undefined){
