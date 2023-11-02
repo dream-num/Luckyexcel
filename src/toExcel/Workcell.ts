@@ -1,5 +1,5 @@
 import XLSX from 'xlsx-js-style';
-import {verticalMap, horizontalMap, wrapTextMap, textRotationMap} from '../common/constant'
+import {verticalMap, horizontalMap, wrapTextMap, textRotationMap, ErrorValueMap} from '../common/constant'
 import {rgbToHex} from '../common/method'
 
 export class WorkCellBase {
@@ -18,7 +18,13 @@ export class WorkCell extends WorkCellBase {
 
     if (ct !== undefined) {
       if (v !== undefined) {
-        this.data.v = v
+        // 错误时 值有特定mapping
+        if (ErrorValueMap[v] !== undefined) {
+          this.data.v = ErrorValueMap[v]
+        } else {
+          this.data.v = v
+        }
+        
         this.data.t = ct.t
       } else if (Array.isArray(ct.s)) {
         // inline string格式的简易处理
@@ -26,9 +32,9 @@ export class WorkCell extends WorkCellBase {
         this.data.v = ct?.s?.reduce((prev: any, cur: { v: any; }) => prev + cur.v, '');
       }
 
-      // 数字
-      if (ct?.t === 'n') {
-        this.data.t = 'n'
+      // 数字 & 错误
+      if (ct?.t === 'n' && ct?.t === 'e') {
+        this.data.t = ct.t
         this.data.z = ct.fa
         f && (this.data.f = f)
       }
@@ -46,6 +52,7 @@ export class WorkCell extends WorkCellBase {
         this.data.t = 's'
         this.data.w = ct.fa
       }
+
     }
 
     // 对齐方式 换行 文字方向
