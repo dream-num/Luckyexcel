@@ -15,7 +15,19 @@ export const worksheetFilePath = "xl/worksheets/";
 export const theme1File = "xl/theme/theme1.xml";
 export const workbookRels= "xl/_rels/workbook.xml.rels";
 
-
+export const ErrorValueMap: stringToNum = {
+    '#NULL!': 0x00,
+    '#DIV/0!': 0x07,
+    '#VALUE!': 0x0F,
+    '#REF!': 0x17,
+    '#NAME?': 0x1D,
+    '#NUM!': 0x24,
+    '#N/A':	0x2A,
+    '#GETTING_DATA': 0x2B,
+    '#SPILL!': 0x0F,
+    '#CONNECT!': 0x0F,
+    '#BLOCKED!': 0x0F
+}
 
 
 //Excel Built-In cell type
