@@ -16,8 +16,8 @@ export class WorkCell extends WorkCellBase {
     this.key = XLSX.utils.encode_cell({ c, r })
     this.data = {v: '', t: 's', s: {}}
 
-    if (ct !== undefined) {
-      if (v !== undefined) {
+    if (ct) {
+      if (v) {
         // 错误时 值有特定mapping
         if (ErrorValueMap[v] !== undefined) {
           this.data.v = ErrorValueMap[v]
@@ -26,7 +26,7 @@ export class WorkCell extends WorkCellBase {
         }
         
         this.data.t = ct.t
-      } else if (Array.isArray(ct.s)) {
+      } else if (Array.isArray(ct?.s)) {
         // inline string格式的简易处理
         this.data.t = 's'
         this.data.v = ct?.s?.reduce((prev: any, cur: { v: any; }) => prev + cur.v, '');
