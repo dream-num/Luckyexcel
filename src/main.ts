@@ -3,10 +3,12 @@ import { ExcelFile } from './toExcel/ExcelFile'
 // import {SecurityDoor,Car} from './content';
 
 import { HandleZip } from './HandleZip';
+import {ExcelFile as ExceljsFile} from './toExceljs/ExcelFile'
 
 import { IuploadfileList } from "./ICommon";
 import XLSX from 'xlsx-js-style';
 import { fstat } from "fs";
+import { Buffer } from "exceljs";
 
 // //demo
 // function demoHandler(){
@@ -170,5 +172,17 @@ export class LuckyExcel {
         } catch(e) {
             errorHandler?.(e)
         }
+    }
+
+    static transformLuckyToExceljs(
+        luckysheetJson: any,
+        callBack?: (files?: any) => void,
+        errorHandler?: (err: Error) => void) {
+            const excelFile = new ExceljsFile(luckysheetJson)
+            excelFile.export().then((data) => {
+                callBack?.(data)
+            }).catch(err => {
+                errorHandler?.(err)
+            });
     }
 }

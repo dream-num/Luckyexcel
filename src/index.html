@@ -31,6 +31,7 @@
         导入excel为sheetjs<input style="font-size:16px;" type="file" id="excel-demo-file" name="excel-demo-file"
             change="demoExcelHandler" />
         <button onclick="exportExcel()">导出excel</button>
+        <button onclick="exportExcelByExceljs()">exceljs导出excel</button>
         Or Load remote xlsx file: <select style="height: 27px;top: -2px;position: relative;"
             id="Luckyexcel-select-demo">
             <option value="">select a demo</option>
@@ -70,7 +71,16 @@
     <script>
         function exportExcel() {
             const data = window.luckysheet.toJson()
-            LuckyExcel.transformLuckyToExcel(data)
+            LuckyExcel.transformLuckyToExcel(data, () => {}, e=> {console.log(e)})
+        }
+        function exportExcelByExceljs () {
+            const json = window.luckysheet.toJson()
+            console.log('json------>>', json)
+            LuckyExcel.transformLuckyToExceljs(json, (data) => {
+                console.log('导出成功---->>', data)
+            }, (e) => {
+                console.log('导出失败---->>', e)
+            })
         }
         function demoHandler() {
             let upload = document.getElementById("Luckyexcel-demo-file");
