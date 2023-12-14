@@ -1,9 +1,11 @@
 'use strict';
 
+var dayjs = require('dayjs');
 var JSZip = require('jszip');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
+var dayjs__default = /*#__PURE__*/_interopDefaultLegacy(dayjs);
 var JSZip__default = /*#__PURE__*/_interopDefaultLegacy(JSZip);
 
 /*! *****************************************************************************
@@ -43,6 +45,7 @@ var workBookFile = "xl/workbook.xml";
 var calcChainFile = "xl/calcChain.xml";
 var stylesFile = "xl/styles.xml";
 var sharedStringsFile = "xl/sharedStrings.xml";
+var worksheetFilePath = "xl/worksheets/";
 var theme1File = "xl/theme/theme1.xml";
 var workbookRels = "xl/_rels/workbook.xml.rels";
 //Excel Built-In cell type
@@ -169,6 +172,11 @@ var borderTypes = {
     "slantDashDot": 12,
     "thick": 13
 };
+var numFmtDefaultMap = {
+    "yyyy/m/d;@": "yyyy/MM/dd",
+    "yyyy&quot;年&quot;m&quot;月&quot;d&quot;日&quot;;@": "yyyy&quot;年&quot;MM&quot;月&quot;dd&quot;日&quot;",
+    "[$-409]yyyy/m/d\\ h:mm\\ AM/PM;@": "yyyy/MM/dd hh:mm AM/PM",
+};
 var fontFamilys = {
     "0": "defualt",
     "1": "Roman",
@@ -176,6 +184,54 @@ var fontFamilys = {
     "3": "Modern",
     "4": "Script",
     "5": "Decorative"
+};
+var DATA_VERIFICATION_MAP = {
+    list: "dropdown",
+    whole: "number_integer",
+    decimal: "number_decimal",
+    custom: "text_content",
+    textLength: "text_length",
+    date: "date",
+    "unknown1": "number",
+    "unknown2": "checkbox",
+    "unknown3": "validity",
+};
+var COMMON_TYPE2 = [
+    "number",
+    "number_integer",
+    "number_decimal",
+    "text_length",
+];
+var DATA_VERIFICATION_TYPE2_MAP = {
+    common: {
+        between: "bw",
+        notBetween: "nb",
+        equal: "eq",
+        notEqualTo: "ne",
+        moreThanThe: "gt",
+        lessThan: "lt",
+        greaterOrEqualTo: "gte",
+        lessThanOrEqualTo: "lte",
+    },
+    text_content: {
+        include: "include",
+        exclude: "exclude",
+        equal: "equal",
+    },
+    date: {
+        between: "bw",
+        notBetween: "nb",
+        equal: "eq",
+        notEqualTo: "ne",
+        earlierThan: "bf",
+        noEarlierThan: "nbf",
+        laterThan: "af",
+        noLaterThan: "naf",
+    },
+    validity: {
+        card: "card",
+        phone: "phone",
+    },
 };
 
 function getcellrange(txt, sheets, sheetId) {
@@ -951,6 +1007,179 @@ function getBinaryContent(path, options) {
     // provided
     return promise;
 }
+/**
+ * multi sequence conversion
+ * example:
+ *  1、E14 -> 13_4
+ *  2、E14 J14 O14 T14 Y14 AD14 AI14 AN14 AS14 AX14 ->
+ *     ['13_4', '13_9','13_14', '13_19', '13_24', '13_3', '13_8',  '13_13', '13_18', '13_23']
+ *  3、E46:E47 -> ['45_4',  '46_4']
+ *
+ * @param {string} sqref - before sequence
+ * @returns {string[]}
+ */
+function getMultiSequenceToNum(sqref) {
+    if (!sqref || (sqref === null || sqref === void 0 ? void 0 : sqref.length) <= 0)
+        return [];
+    sqref = sqref.toUpperCase();
+    var sqrefRawArr = sqref.split(" ");
+    var sqrefArr = sqrefRawArr.filter(function (e) { return e && e.trim(); });
+    var sqrefLastArr = getSqrefRawArrFormat(sqrefArr);
+    var resArr = [];
+    for (var i = 0; i < sqrefLastArr.length; i++) {
+        var _res = getSingleSequenceToNum(sqrefLastArr[i]);
+        if (_res)
+            resArr.push(_res);
+    }
+    return resArr;
+}
+/**
+ * get region sequence
+ * example:
+ *  1、[A1:C2'] -> ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+ *
+ * @param {string[]} arr - formats arr
+ * @returns {string[]} - after arr
+ */
+function getRegionSequence(arr) {
+    var _a, _b;
+    var formatArr = [];
+    var regEn = new RegExp(/[A-Z]+|[0-9]+/g);
+    var startArr = (_a = arr[0]) === null || _a === void 0 ? void 0 : _a.match(regEn);
+    var lastArr = (_b = arr[1]) === null || _b === void 0 ? void 0 : _b.match(regEn);
+    var columnMax = Math.max.apply(Math, [ABCatNum(startArr[0]), ABCatNum(lastArr[0])]);
+    var columnMin = Math.min.apply(Math, [ABCatNum(startArr[0]), ABCatNum(lastArr[0])]);
+    var rowMax = Math.max.apply(Math, [parseInt(startArr[1]), parseInt(lastArr[1])]);
+    var rowMin = Math.min.apply(Math, [parseInt(startArr[1]), parseInt(lastArr[1])]);
+    for (var i = columnMin; i <= columnMax; i++) {
+        for (var j = rowMin; j <= rowMax; j++) {
+            formatArr.push("" + chatatABC(i) + j);
+        }
+    }
+    return formatArr;
+}
+/**
+ * unified processing of conversion formats
+ * example:
+ *  1、['E38', 'A1:C2'] -> ['E38', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+ *
+ * @param {string[]} arr - formats arr
+ * @returns {string[]} - after arr
+ */
+function getSqrefRawArrFormat(arr) {
+    arr === null || arr === void 0 ? void 0 : arr.map(function (el) {
+        if (el.includes(":")) {
+            var tempArr = el.split(":");
+            if ((tempArr === null || tempArr === void 0 ? void 0 : tempArr.length) === 2) {
+                arr = arr.concat(getRegionSequence(tempArr));
+                arr.splice(arr.indexOf(el), 1);
+            }
+        }
+    });
+    var resultArr = arr.filter(function (value, index, array) { return array.indexOf(value) === index; });
+    return resultArr;
+}
+/**
+ * single sequence to number
+ * example:
+ *  1、A1 -> 0_0
+ *  2、ES14 -> 13_4
+ *
+ * @param {string} sqref - before sequence
+ * @returns {string} - after sequence
+ */
+function getSingleSequenceToNum(sqref) {
+    var sqrefArray = sqref.match(/[A-Z]+|[0-9]+/g);
+    var sqrefLen = sqrefArray.length;
+    var regEn = new RegExp("^[A-Z]+$");
+    var ret = "";
+    for (var i = sqrefLen - 1; i >= 0; i--) {
+        var cur = sqrefArray[i];
+        if (regEn.test(cur)) {
+            ret += ABCatNum(cur) + "_";
+        }
+        else {
+            ret += parseInt(cur) - 1 + "_";
+        }
+    }
+    return ret.substring(0, ret.length - 1);
+}
+/**
+ * R1C1 to Sequence
+ * example: sheet2!R1C1 => sheet!A1
+ *
+ * @param {string} value - R1C1 value
+ * @returns
+ */
+function getTransR1C1ToSequence(value) {
+    if (!value && (value === null || value === void 0 ? void 0 : value.length) <= 0)
+        return "";
+    var len = value.length;
+    var index = value.lastIndexOf("!");
+    var valueArr = [value.slice(0, index), value.slice(index + 1, len)];
+    var repStr = valueArr[1] || "";
+    var indexR = repStr.indexOf("R");
+    var indexC = repStr.indexOf("C");
+    var row = Number(repStr.slice(indexR + 1, indexC));
+    var column = chatatABC(Number(repStr.slice(indexC + 1, repStr === null || repStr === void 0 ? void 0 : repStr.length)) - 1);
+    return valueArr[0] + "!" + column + row;
+}
+/**
+ * strip x14 format data
+ *
+ * @param {string} value
+ * @returns {Object} - { formula, sqref }
+ */
+function getPeelOffX14(value) {
+    var _a;
+    if (!value || (value === null || value === void 0 ? void 0 : value.length) <= 0)
+        return {};
+    // formula
+    var formulaReg = new RegExp("</x14:formula[^]>", "g");
+    var lastIndex = (_a = value.match(formulaReg)) === null || _a === void 0 ? void 0 : _a.length;
+    var lastValue = "</x14:formula" + lastIndex + ">";
+    var lastValueEnd = value.indexOf(lastValue);
+    var formulaValue = value.substring(0, lastValueEnd + lastValue.length);
+    formulaValue = formulaValue
+        .replace(/<xm:f>/g, "")
+        .replace(/<\/xm:f>/g, "")
+        .replace(/x14:/g, "")
+        .replace(/\/x14:/g, "");
+    var formula = formulaValue;
+    // sqref
+    var xmSqrefLen = "<xm:sqref>".length;
+    var sqrefStart = value.indexOf("<xm:sqref>");
+    var sqrefEnd = value.indexOf("</xm:sqref>");
+    var sqref = value.substring(sqrefStart + xmSqrefLen, sqrefEnd);
+    return {
+        formula: formula,
+        sqref: sqref,
+    };
+}
+/**
+ * get the value in the formula
+ *
+ * @param {string} value - extracted value
+ * @returns {string[]}
+ */
+function getMultiFormulaValue(value) {
+    var _a, _b;
+    if (!value || (value === null || value === void 0 ? void 0 : value.length) <= 0)
+        return [];
+    var lenReg = new RegExp("formula", "g");
+    var len = (((_a = value.match(lenReg)) === null || _a === void 0 ? void 0 : _a.length) || 0) / 2;
+    if (len === 0)
+        return [];
+    var retArr = [];
+    for (var i = 1; i <= len; i++) {
+        var startLen = (_b = "<formula" + i + ">") === null || _b === void 0 ? void 0 : _b.length;
+        var start = value.indexOf("<formula" + i + ">");
+        var end = value.indexOf("</formula" + i + ">");
+        var _value = value.substring(start + startLen, end);
+        retArr.push(escapeCharacter(_value.replace(/&quot;|^\"|\"$/g, "")));
+    }
+    return retArr;
+}
 
 var xmloperation = /** @class */ (function () {
     function xmloperation() {
@@ -1498,7 +1727,7 @@ var LuckySheetCelldata = /** @class */ (function (_super) {
                 var cellFormat = new LuckySheetCellFormat();
                 cellFormat.fa = escapeCharacter(numf);
                 // console.log(numf, numFmtId, this.v);
-                cellFormat.t = t;
+                cellFormat.t = t || 'd';
                 cellValue.ct = cellFormat;
             }
             if (fillId != undefined) {
@@ -1647,6 +1876,11 @@ var LuckySheetCelldata = /** @class */ (function (_super) {
                 else {
                     cellValue.vt = 1;
                 }
+            }
+            else {
+                //sometimes bottom style is lost after setting it in excel
+                //when vertical is undefined set it to 2.
+                cellValue.vt = 2;
             }
             if (wrapText != undefined) {
                 if (wrapText == "1") {
@@ -2017,8 +2251,10 @@ var LuckySheetCelldata = /** @class */ (function (_super) {
                     cellValue.ct = cellFormat;
                 }
             }
-            // else if(t==ST_CellType["InlineString"] && v!=null){
-            // }
+            // to be confirmed
+            else if (t == ST_CellType["InlineString"] && v != null) {
+                cellValue.v = "'" + value;
+            }
             else {
                 value = escapeCharacter(value);
                 cellValue.v = value;
@@ -2089,7 +2325,7 @@ var LuckySheetCelldata = /** @class */ (function (_super) {
         return ret;
     };
     LuckySheetCelldata.prototype.htmlDecode = function (str) {
-        return str.replace(/&#(x)?([^&]{1,5});?/g, function ($, $1, $2) {
+        return str.replace(/&#(x)?([^&]{1,5});/g, function ($, $1, $2) {
             return String.fromCharCode(parseInt($2, $1 ? 16 : 10));
         });
     };
@@ -2111,9 +2347,10 @@ var LuckySheet = /** @class */ (function (_super) {
         _this.calcChainEles = allFileOption.calcChain;
         _this.sheetList = allFileOption.sheetList;
         _this.imageList = allFileOption.imageList;
+        _this.hide = allFileOption.hide;
         //Output
         _this.name = sheetName;
-        _this.id = sheetId;
+        _this.index = sheetId;
         _this.order = sheetOrder.toString();
         _this.config = new LuckyConfig();
         _this.celldata = [];
@@ -2157,6 +2394,24 @@ var LuckySheet = /** @class */ (function (_super) {
         _this.defaultRowHeight = getRowHeightPixel(parseFloat(defaultRowHeight));
         _this.generateConfigColumnLenAndHidden();
         var cellOtherInfo = _this.generateConfigRowLenAndHiddenAddCell();
+        if (_this.calcChain == null) {
+            _this.calcChain = [];
+        }
+        var formulaListExist = {};
+        for (var c = 0; c < _this.calcChainEles.length; c++) {
+            var calcChainEle = _this.calcChainEles[c], attrList = calcChainEle.attributeList;
+            if (attrList.i != sheetId) {
+                continue;
+            }
+            var r = attrList.r, i = attrList.i, l = attrList.l, s = attrList.s, a = attrList.a, t = attrList.t;
+            var range = getcellrange(r);
+            var chain = new LuckysheetCalcChain();
+            chain.r = range.row[0];
+            chain.c = range.column[0];
+            chain.index = _this.index;
+            _this.calcChain.push(chain);
+            formulaListExist["r" + r + "c" + c] = null;
+        }
         if (_this.formulaRefList != null) {
             for (var key in _this.formulaRefList) {
                 var funclist = _this.formulaRefList[key];
@@ -2189,26 +2444,14 @@ var LuckySheet = /** @class */ (function (_super) {
                     }
                     // console.log(offsetRow, offsetCol, func);
                     cellValue.v.f = func;
+                    //添加共享公式链
+                    var chain = new LuckysheetCalcChain();
+                    chain.r = cellValue.r;
+                    chain.c = cellValue.c;
+                    chain.index = _this.index;
+                    _this.calcChain.push(chain);
                 }
             }
-        }
-        if (_this.calcChain == null) {
-            _this.calcChain = [];
-        }
-        var formulaListExist = {};
-        for (var c = 0; c < _this.calcChainEles.length; c++) {
-            var calcChainEle = _this.calcChainEles[c], attrList = calcChainEle.attributeList;
-            if (attrList.i != sheetId) {
-                continue;
-            }
-            var r = attrList.r, i = attrList.i, l = attrList.l, s = attrList.s, a = attrList.a, t = attrList.t;
-            var range = getcellrange(r);
-            var chain = new LuckysheetCalcChain();
-            chain.r = range.row[0];
-            chain.c = range.column[0];
-            chain.id = _this.id;
-            _this.calcChain.push(chain);
-            formulaListExist["r" + r + "c" + c] = null;
         }
         //There may be formulas that do not appear in calcChain
         for (var key in cellOtherInfo.formulaList) {
@@ -2217,10 +2460,16 @@ var LuckySheet = /** @class */ (function (_super) {
                 var chain = new LuckysheetCalcChain();
                 chain.r = formulaListItem.r;
                 chain.c = formulaListItem.c;
-                chain.id = _this.id;
+                chain.index = _this.index;
                 _this.calcChain.push(chain);
             }
         }
+        // dataVerification config
+        _this.dataVerification = _this.generateConfigDataValidations();
+        // hyperlink config
+        _this.hyperlink = _this.generateConfigHyperlinks();
+        // sheet hide
+        _this.hide = _this.hide;
         if (_this.mergeCells != null) {
             for (var i = 0; i < _this.mergeCells.length; i++) {
                 var merge = _this.mergeCells[i], attrList = merge.attributeList;
@@ -2524,6 +2773,138 @@ var LuckySheet = /** @class */ (function (_super) {
             }
         }
         return cellOtherInfo;
+    };
+    /**
+     * luckysheet config of dataValidations
+     *
+     * @returns {IluckysheetDataVerification} - dataValidations config
+     */
+    LuckySheet.prototype.generateConfigDataValidations = function () {
+        var rows = this.readXml.getElementsByTagName("dataValidations/dataValidation", this.sheetFile);
+        var extLst = this.readXml.getElementsByTagName("extLst/ext/x14:dataValidations/x14:dataValidation", this.sheetFile) || [];
+        rows = rows.concat(extLst);
+        var dataVerification = {};
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var attrList = row.attributeList;
+            var formulaValue = row.value;
+            var type = getXmlAttibute(attrList, "type", null);
+            if (!type) {
+                continue;
+            }
+            var operator = "", sqref = "", sqrefIndexArr = [], valueArr = [];
+            var _prohibitInput = getXmlAttibute(attrList, "allowBlank", null) !== "1" ? false : true;
+            // x14 processing
+            var formulaReg = new RegExp(/<x14:formula1>|<xm:sqref>/g);
+            if (formulaReg.test(formulaValue) && (extLst === null || extLst === void 0 ? void 0 : extLst.length) >= 0) {
+                operator = getXmlAttibute(attrList, "operator", null);
+                var peelOffData = getPeelOffX14(formulaValue);
+                sqref = peelOffData === null || peelOffData === void 0 ? void 0 : peelOffData.sqref;
+                sqrefIndexArr = getMultiSequenceToNum(sqref);
+                valueArr = getMultiFormulaValue(peelOffData === null || peelOffData === void 0 ? void 0 : peelOffData.formula);
+            }
+            else {
+                operator = getXmlAttibute(attrList, "operator", null);
+                sqref = getXmlAttibute(attrList, "sqref", null);
+                sqrefIndexArr = getMultiSequenceToNum(sqref);
+                valueArr = getMultiFormulaValue(formulaValue);
+            }
+            var _type = DATA_VERIFICATION_MAP[type];
+            var _type2 = null;
+            var _value1 = (valueArr === null || valueArr === void 0 ? void 0 : valueArr.length) >= 1 ? valueArr[0] : "";
+            var _value2 = (valueArr === null || valueArr === void 0 ? void 0 : valueArr.length) === 2 ? valueArr[1] : "";
+            var _hint = getXmlAttibute(attrList, "prompt", null);
+            var _hintShow = _hint ? true : false;
+            var matchType = COMMON_TYPE2.includes(_type) ? "common" : _type;
+            _type2 = operator
+                ? DATA_VERIFICATION_TYPE2_MAP[matchType][operator]
+                : "bw";
+            // mobile phone number processing
+            if (_type === "text_content" &&
+                ((_value1 === null || _value1 === void 0 ? void 0 : _value1.includes("LEN")) || (_value1 === null || _value1 === void 0 ? void 0 : _value1.includes("len"))) && (_value1 === null || _value1 === void 0 ? void 0 : _value1.includes("=11"))) {
+                _type = "validity";
+                _type2 = "phone";
+            }
+            // date processing
+            if (_type === "date") {
+                var D1900 = new Date(1899, 11, 30, 0, 0, 0);
+                _value1 = dayjs__default['default'](D1900)
+                    .clone()
+                    .add(Number(_value1), "day")
+                    .format("YYYY-MM-DD");
+                _value2 = dayjs__default['default'](D1900)
+                    .clone()
+                    .add(Number(_value2), "day")
+                    .format("YYYY-MM-DD");
+            }
+            // checkbox and dropdown processing
+            if (_type === "checkbox" || _type === "dropdown") {
+                _type2 = null;
+            }
+            // dynamically add dataVerifications
+            for (var _i = 0, sqrefIndexArr_1 = sqrefIndexArr; _i < sqrefIndexArr_1.length; _i++) {
+                var ref = sqrefIndexArr_1[_i];
+                dataVerification[ref] = {
+                    type: _type,
+                    type2: _type2,
+                    value1: _value1,
+                    value2: _value2,
+                    checked: false,
+                    remote: false,
+                    prohibitInput: _prohibitInput,
+                    hintShow: _hintShow,
+                    hintText: _hint
+                };
+            }
+        }
+        return dataVerification;
+    };
+    /**
+     * luckysheet config of hyperlink
+     *
+     * @returns {IluckysheetHyperlink} - hyperlink config
+     */
+    LuckySheet.prototype.generateConfigHyperlinks = function () {
+        var _a;
+        var rows = this.readXml.getElementsByTagName("hyperlinks/hyperlink", this.sheetFile);
+        var hyperlink = {};
+        var _loop_1 = function (i) {
+            var row = rows[i];
+            var attrList = row.attributeList;
+            var ref = getXmlAttibute(attrList, "ref", null), refArr = getMultiSequenceToNum(ref), _display = getXmlAttibute(attrList, "display", null), _address = getXmlAttibute(attrList, "location", null), _tooltip = getXmlAttibute(attrList, "tooltip", null);
+            var _type = _address ? "internal" : "external";
+            // external hyperlink
+            if (!_address) {
+                var rid_1 = attrList["r:id"];
+                var sheetFile = this_1.sheetFile;
+                var relationshipList = this_1.readXml.getElementsByTagName("Relationships/Relationship", "xl/worksheets/_rels/" + sheetFile.replace(worksheetFilePath, "") + ".rels");
+                var findRid = relationshipList === null || relationshipList === void 0 ? void 0 : relationshipList.find(function (e) { return e.attributeList["Id"] === rid_1; });
+                if (findRid) {
+                    _address = findRid.attributeList["Target"];
+                    _type = (_a = findRid.attributeList["TargetMode"]) === null || _a === void 0 ? void 0 : _a.toLocaleLowerCase();
+                }
+            }
+            // match R1C1
+            var addressReg = new RegExp(/^.*!R([\d$])+C([\d$])*$/g);
+            if (addressReg.test(_address)) {
+                _address = getTransR1C1ToSequence(_address);
+            }
+            // dynamically add hyperlinks
+            for (var _i = 0, refArr_1 = refArr; _i < refArr_1.length; _i++) {
+                var ref_1 = refArr_1[_i];
+                hyperlink[ref_1] = {
+                    linkAddress: _address,
+                    linkTooltip: _tooltip || "",
+                    linkType: _type,
+                    display: _display || "",
+                };
+            }
+        };
+        var this_1 = this;
+        for (var i = 0; i < rows.length; i++) {
+            _loop_1(i);
+        }
+        return hyperlink;
     };
     return LuckySheet;
 }(LuckySheetBase));
@@ -3724,7 +4105,7 @@ var LuckyFile = /** @class */ (function (_super) {
             var formatcode = getXmlAttibute(attrList, "formatCode", "@");
             // console.log(numfmtid, formatcode);
             if (!(numfmtid in numFmtDefault)) {
-                numFmtDefaultC[numfmtid] = formatcode;
+                numFmtDefaultC[numfmtid] = numFmtDefaultMap[formatcode] || formatcode;
             }
         }
         // console.log(JSON.stringify(numFmtDefaultC), numfmts);
@@ -3745,7 +4126,7 @@ var LuckyFile = /** @class */ (function (_super) {
             var rel = workbookRelList[i], attrList = rel.attributeList;
             var id = attrList["Id"], target = attrList["Target"];
             if (regex.test(target)) {
-                if (target.startsWith('/xl')) {
+                if (target.indexOf('/xl') === 0) {
                     sheetNames[id] = target.substr(1);
                 }
                 else {
@@ -3806,6 +4187,7 @@ var LuckyFile = /** @class */ (function (_super) {
             var sheetId = sheet.attributeList["sheetId"];
             var rid = sheet.attributeList["r:id"];
             var sheetFile = this.getSheetFileBysheetId(rid);
+            var hide = sheet.attributeList.state === "hidden" ? 1 : 0;
             var drawing = this.readXml.getElementsByTagName("worksheet/drawing", sheetFile), drawingFile = void 0, drawingRelsFile = void 0;
             if (drawing != null && drawing.length > 0) {
                 var attrList = drawing[0].attributeList;
@@ -3826,6 +4208,7 @@ var LuckyFile = /** @class */ (function (_super) {
                     imageList: this.imageList,
                     drawingFile: drawingFile,
                     drawingRelsFile: drawingRelsFile,
+                    hide: hide,
                 });
                 this.columnWidthSet = [];
                 this.rowHeightSet = [];
@@ -3941,7 +4324,7 @@ var LuckyFile = /** @class */ (function (_super) {
             imageObject.default.top = y_n;
             imageObject.default.width = cx_n;
         }
-        console.log(this.columnWidthSet, this.rowHeightSet);
+        //console.log(this.columnWidthSet, this.rowHeightSet);
     };
     /**
     * @return drawing file string
@@ -4034,8 +4417,8 @@ var LuckyFile = /** @class */ (function (_super) {
                 //     delete sheetout.config._borderInfo;
                 // }
             }
-            if (sheet.id != null) {
-                sheetout.id = sheet.id;
+            if (sheet.index != null) {
+                sheetout.index = sheet.index;
             }
             if (sheet.status != null) {
                 sheetout.status = sheet.status;
@@ -4101,6 +4484,15 @@ var LuckyFile = /** @class */ (function (_super) {
             }
             if (sheet.images != null) {
                 sheetout.images = sheet.images;
+            }
+            if (sheet.dataVerification != null) {
+                sheetout.dataVerification = sheet.dataVerification;
+            }
+            if (sheet.hyperlink != null) {
+                sheetout.hyperlink = sheet.hyperlink;
+            }
+            if (sheet.hide != null) {
+                sheetout.hide = sheet.hide;
             }
             LuckyOutPutFile.sheets.push(sheetout);
         });
@@ -4287,20 +4679,25 @@ var HandleZip = /** @class */ (function () {
 var LuckyExcel = /** @class */ (function () {
     function LuckyExcel() {
     }
-    LuckyExcel.transformExcelToLucky = function (excelFile, callBack) {
+    LuckyExcel.transformExcelToLucky = function (excelFile, callback, errorHandler) {
         var handleZip = new HandleZip(excelFile);
         handleZip.unzipFile(function (files) {
             var luckyFile = new LuckyFile(files, excelFile.name);
             var luckysheetfile = luckyFile.Parse();
             var exportJson = JSON.parse(luckysheetfile);
-            if (callBack != undefined) {
-                callBack(exportJson, luckysheetfile);
+            if (callback != undefined) {
+                callback(exportJson, luckysheetfile);
             }
         }, function (err) {
-            console.error(err);
+            if (errorHandler) {
+                errorHandler(err);
+            }
+            else {
+                console.error(err);
+            }
         });
     };
-    LuckyExcel.transformExcelToLuckyByUrl = function (url, name, callBack) {
+    LuckyExcel.transformExcelToLuckyByUrl = function (url, name, callBack, errorHandler) {
         var handleZip = new HandleZip();
         handleZip.unzipFileByUrl(url, function (files) {
             var luckyFile = new LuckyFile(files, name);
@@ -4310,11 +4707,15 @@ var LuckyExcel = /** @class */ (function () {
                 callBack(exportJson, luckysheetfile);
             }
         }, function (err) {
-            console.error(err);
+            if (errorHandler) {
+                errorHandler(err);
+            }
+            else {
+                console.error(err);
+            }
         });
     };
-    LuckyExcel.transformLuckyToExcel = function (LuckyFile, callBack) {
-    };
+    LuckyExcel.transformLuckyToExcel = function (LuckyFile, callBack, errorHandler) { };
     return LuckyExcel;
 }());
 
