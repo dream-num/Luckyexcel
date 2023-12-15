@@ -57,8 +57,8 @@ export class WorkSheet extends WorkSheetBase {
         if (parseInt(_row) > maxRow) {
           return;
         }
-        const row = this.worksheet.getRow(parseInt(_row));
-        row.height = Math.round(parseFloat(columnlen?.[_row] ?? 20) * 0.17)
+        const row = this.worksheet.getRow(parseInt(_row) + 1);
+        row.height = Math.round(parseFloat(rowlen?.[_row] ?? 20) * 0.5)
       })
     }
 
