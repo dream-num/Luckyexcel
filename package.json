@@ -47,6 +47,8 @@
   },
   "dependencies": {
     "dayjs": "^1.10.6",
-    "jszip": "^3.5.0"
+    "exceljs": "^4.4.0",
+    "jszip": "^3.5.0",
+    "xlsx-js-style": "^1.2.0"
   }
 }

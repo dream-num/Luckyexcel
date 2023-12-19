@@ -1,4 +1,4 @@
-import {stringToNum, IattributeList, numTostring, IDataVerificationMap, IDataVerificationType2Map} from "../ICommon";
+import {stringToNum, IattributeList, numTostring, stringToBoolean, IDataVerificationMap, IDataVerificationType2Map} from "../ICommon";
 
 export const columeHeader_word:string[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
@@ -15,7 +15,19 @@ export const worksheetFilePath = "xl/worksheets/";
 export const theme1File = "xl/theme/theme1.xml";
 export const workbookRels= "xl/_rels/workbook.xml.rels";
 
-
+export const ErrorValueMap: stringToNum = {
+    '#NULL!': 0x00,
+    '#DIV/0!': 0x07,
+    '#VALUE!': 0x0F,
+    '#REF!': 0x17,
+    '#NAME?': 0x1D,
+    '#NUM!': 0x24,
+    '#N/A':	0x2A,
+    '#GETTING_DATA': 0x2B,
+    '#SPILL!': 0x0F,
+    '#CONNECT!': 0x0F,
+    '#BLOCKED!': 0x0F
+}
 
 
 //Excel Built-In cell type
@@ -176,6 +188,56 @@ export const borderTypes:stringToNum = {
     "thick":13
 }
 
+// 对齐文档 BORDER_STYLE https://github.com/gitbrent/xlsx-js-style#border_style-string-properties
+export const excelBorderStyles: IattributeList = {
+    '1': 'thin',
+    '2': 'hair',
+    '3': 'dotted',
+    '4': 'dashed',
+    '5': 'dashDot',
+    '6': 'dashDotDot',
+    '8': 'medium',
+    '9': 'mediumDashed',
+    '10': 'mediumDashDot',
+    '11': 'mediumDashDotDot',
+    '12': 'slantDashDot',
+    '13': 'thick',
+}
+
+export const excelBorderPositions: IattributeList = {
+    t: "top",
+    b: "bottom",
+    l: "left",
+    r: "right",
+}
+
+export const verticalMap: IattributeList = {
+    '0': 'center',
+    '1': 'top',
+    '2': 'bottom',
+}
+
+export const horizontalMap: IattributeList = {
+    '0': 'center',
+    '1': 'left',
+    '2': 'right',
+}
+
+export const wrapTextMap: stringToBoolean = {
+    '0': false,
+    '1': false,
+    '2': true,
+}
+
+export const textRotationMap: stringToNum = {
+    '0': 0,
+    '1': 45,
+    '2': 135,
+    '3': 255,
+    '4': 90,
+    '5': 180,
+}
+
 
 export let numFmtDefaultMap: IattributeList = {
     "yyyy/m/d;@": "yyyy/MM/dd",
@@ -243,3 +305,5 @@ export const DATA_VERIFICATION_TYPE2_MAP: IDataVerificationType2Map = {
       phone: "phone",
     },
 };
+
+export { IattributeList };

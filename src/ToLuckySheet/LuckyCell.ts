@@ -201,7 +201,7 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
                 let cellFormat = new LuckySheetCellFormat();
                 cellFormat.fa = escapeCharacter(numf);
                 // console.log(numf, numFmtId, this.v);
-                cellFormat.t = t || 'd';
+                cellFormat.t = t || 'n';
                 cellValue.ct = cellFormat;
             }
 
@@ -416,7 +416,10 @@ export class LuckySheetCelldata extends LuckySheetCelldataBase{
             }
 
             if(indent!=undefined){//luckysheet unsupport
-
+                const result = parseInt(indent)
+                if (!isNaN(result)) {
+                    cellValue.ti = result
+                }
             }
 
             if(borderId!=undefined){

@@ -121,7 +121,7 @@ async function compile() {
             // commonjs(), // converts date-fns to ES modules
             typescript({
                 tsconfigOverride: { 
-                    compilerOptions : { module: "ESNext" } 
+                    compilerOptions : { module: "ESNext", "sourceMap": true } 
                 }
             }),
             // terser(), // minify, but only in production
@@ -134,14 +134,14 @@ async function compile() {
         format: 'esm',
         name: 'LuckyExcel',
         inlineDynamicImports:true,
-        // sourcemap: true
+        sourcemap: true
     })
     bundle.write({
         file: pkg.main,
         format: 'cjs',
         name: 'LuckyExcel',
         inlineDynamicImports:true,
-        // sourcemap: true
+        sourcemap: true
     })
     // bundle.write({
     //     file: pkg.browser,
@@ -169,7 +169,7 @@ function bundleUMD() {
     .bundle()
     .pipe(source('luckyexcel.umd.js'))
     .pipe(buffer())
-    // .pipe(sourcemaps.init({loadMaps: true})) //The production environment does not need source map file
+    .pipe(sourcemaps.init({loadMaps: true})) //The production environment does not need source map file
     // .pipe(uglify())
     .pipe(sourcemaps.write('./'))
     .pipe(dest("dist"));

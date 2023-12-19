@@ -124,7 +124,7 @@ function ABCatNum(abc:string) {
 }
 
 //列下标  数字转字母
-function chatatABC(index:number) {
+export function chatatABC(index:number) {
     let wordlen = columeHeader_word.length;
 
     if (index < wordlen) {
@@ -236,7 +236,7 @@ export function LightenDarkenColor(sixColor:string, tint:number){
 }
 
 
-function rgbToHex(rgb:string){
+export function rgbToHex(rgb:string){
     //十六进制颜色值的正则表达式
     var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
     // 如果是rgb颜色表示
@@ -1163,4 +1163,80 @@ export function getMultiFormulaValue(value: string): string[] {
     retArr.push(escapeCharacter(_value.replace(/&quot;|^\"|\"$/g, "")));
   }
   return retArr;
+}
+
+/**
+ * 检查某一单元格是否在指定区域内
+ * @param {Number} r 单元格所在行
+ * @param {Number} c 单元格所在列
+ * @param {Array} specifiedRange 指定区域 
+ */
+export function checkCellWithinSpecifiedRange(r: number, c: number, specifiedRange: {row: number[], column: number[]}[]) {
+    let within = false
+    if (!specifiedRange || specifiedRange.length === 0) {
+        return false
+    }
+    for(let item of specifiedRange){
+        let r1 = item.row[0], r2 = item.row[1];
+        let c1 = item.column[0], c2 = item.column[1];
+
+        if(r>=r1 && r<=r2 && c>=c1 && c<=c2){
+            within = true;
+            break;
+        }
+    }
+    return within
+}
+export interface CellAddress {
+	/** Column number */
+	c: number | string;
+	/** Row number */
+	r: number | string;
+}
+
+export interface Range {
+	/** Starting cell */
+	s: CellAddress;
+	/** Ending cell */
+	e: CellAddress;
+}
+
+export function decodeCell(cstr: string) {
+	var R = 0, C = 0;
+	for(var i = 0; i < cstr.length; ++i) {
+		var cc = cstr.charCodeAt(i);
+		if(cc >= 48 && cc <= 57) R = 10 * R + (cc - 48);
+		else if(cc >= 65 && cc <= 90) C = 26 * C + (cc - 64);
+	}
+	return { c: C - 1, r:R - 1 };
+}
+
+export function encodeCell(cell: CellAddress): string {
+    if (typeof cell.c === 'string') {
+        cell.c = parseInt(cell.c)
+    }
+    if (typeof cell.r === 'string') {
+        cell.r = parseInt(cell.r)
+    }
+	var col = cell.c + 1;
+	var s="";
+	for(; col; col=((col-1)/26)|0) s = String.fromCharCode(((col-1)%26) + 65) + s;
+	return s + (cell.r + 1);
+}
+
+export function decodeRange(range: string):Range {
+	var idx = range.indexOf(":");
+	if(idx == -1) return { s: decodeCell(range), e: decodeCell(range) };
+	return { s: decodeCell(range.slice(0, idx)), e: decodeCell(range.slice(idx + 1)) };
+}
+
+export function encodeRange(cs: CellAddress, ce: CellAddress):string {
+    let s,e
+	if(typeof cs !== 'string') {
+        s = encodeCell(cs)
+    }
+	if(typeof ce !== 'string') {
+        e = encodeCell(ce);
+    }
+	return s == e ? s : s + ":" + e;
 }
